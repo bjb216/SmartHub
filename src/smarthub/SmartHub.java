@@ -17,6 +17,12 @@ public class SmartHub {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        //this is new
+        //
+        //
+        //
+        int unused =7;
         int a=5;
          int b=5;
          int c=a+b;
