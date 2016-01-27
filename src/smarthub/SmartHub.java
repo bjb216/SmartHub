@@ -12,6 +12,8 @@ public class SmartHub {
         
         int unused =7;
         int a=5;
+        int abc;
+        int cde;
          int b=5;
          int c=a+b;
          //System.out.println(c);
