@@ -10,12 +10,8 @@ public class SmartHub {
      */
     public static void main(String[] args) {
         
-        int unused =7;
-        int a=5;
-         int b=5;
-         int c=a+b;
-         //System.out.println(c);
-         //System.out.println("hi");
+        int matt=10;
+        
          System.out.println("January 27utput");
         Scanner scan=new Scanner(System.in);
         System.out.println("enter X: ");
