@@ -12,6 +12,8 @@ public class SmartHub {
         
         System.out.println("welcome to smarthub");
         System.out.println("new line");
+        System.out.println("third line");
+        System.out.println("fourth line");
     }
     
 }
