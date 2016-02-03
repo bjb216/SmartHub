@@ -11,6 +11,7 @@ public class SmartHub {
     public static void main(String[] args) {
         
         System.out.println("welcome to smarthub");
+        System.out.println("new line");
     }
     
 }
