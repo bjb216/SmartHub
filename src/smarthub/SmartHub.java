@@ -11,7 +11,7 @@ public class SmartHub {
     public static void main(String[] args) {
         
         int matt=10;
-        
+        int brandon=1;
          System.out.println("January 27utput");
         Scanner scan=new Scanner(System.in);
         System.out.println("enter X: ");
