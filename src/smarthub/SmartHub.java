@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
+import static javax.bluetooth.DiscoveryAgent.PREKNOWN;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
@@ -20,19 +21,14 @@ import javax.bluetooth.ServiceRecord;
 
 public class SmartHub {
 
-    /**
-     * @param args the command line arguments
-     */
     public static final Vector/*<RemoteDevice>*/ devicesDiscovered = new Vector();
+    public static final String bjbid="70:3E:AC:1A:10:42";
+    public static final String mdbid="10:D5:42:EF:EC:45";
 
-    public static void main(String[] args) throws BluetoothStateException, InterruptedException {
-        System.out.println("hi dude");
+    public static void main(String[] args) throws BluetoothStateException, InterruptedException, IOException {
+        System.out.println("new test 2-10-16");
         final Object inquiryCompletedEvent = new Object();
         devicesDiscovered.clear();
-        
-        //LocalDevice ld=LocalDevice.getLocalDevice();
-        //DiscoveryAgent agent = ld.getDiscoveryAgent();
-        //agent.startInquiry(DiscoveryAgent.GIAC, new MyDiscoveryListener());
         
         DiscoveryListener listener = new DiscoveryListener() {
             public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
@@ -65,6 +61,30 @@ public class SmartHub {
                 System.out.println(devicesDiscovered.size() +  " device(s) found");
             }
         }
+        
+         LocalDevice ld=LocalDevice.getLocalDevice();
+        DiscoveryAgent agent = ld.getDiscoveryAgent();
+        RemoteDevice[] devs=agent.retrieveDevices(DiscoveryAgent.CACHED);
+        if(devs==null)
+            System.out.println("cached is null");
+        else
+            System.out.println("cached size: "+devs.length);
+        
+        RemoteDevice bjb=devs[0];
+        System.out.println("starting to wait");
+        try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(SmartHub.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        
+        System.out.println(bjb.getFriendlyName(true));
+        System.out.println(bjb.getBluetoothAddress());
+        if(bjb.isTrustedDevice())
+            System.out.println("is trusted device");
+
+        
+        
     
 
     /*
@@ -90,11 +110,7 @@ public class SmartHub {
                 Logger.getLogger(SmartHub.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(SmartHub.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            
             
         }
      */
