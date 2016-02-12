@@ -1,18 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package smarthub;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.bluetooth.BluetoothStateException;
 
-/**
- *
- * @author bartonb
- */
 public class Controller {
     BTConnection con;
     
@@ -32,12 +24,17 @@ public class Controller {
         }
     }
     public void run() {
-        if(con!=null){
+        if(con.devs!=null){
             for(int i=0;i<con.devs.length;i++){
                 System.out.println("ID "+i+": "+con.devs[i]);
             }
         }
-        //System.out.println("You have begun coding");
+        GCalendar cal = new GCalendar("xxxx","yyy");
+        ArrayList<String> events = cal.getMeetings();
+        
+        //Print out events
+        //for...
+        
         
     }
     
