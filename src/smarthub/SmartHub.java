@@ -22,8 +22,6 @@ import javax.microedition.io.Connector;
 import javax.obex.ClientSession;
 
 public class SmartHub {
-
-    public static final Vector/*<RemoteDevice>*/ devicesDiscovered = new Vector();
     public static final String bjbid = "703EAC1A1042";
     public static final String mdbid = "10D542EFEC45";
 
