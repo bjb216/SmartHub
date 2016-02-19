@@ -1,10 +1,13 @@
 package smarthub;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
@@ -20,35 +23,69 @@ import javax.obex.*;
 
 public class BTConnection {
 
-    RemoteDevice[] devs;
-    public static final Vector/*<RemoteDevice>*/ devicesDiscovered = new Vector();
-    public static final String bjbid = "703EAC1A1042";
-    public static final String mdbid = "10D542EFEC45";
-
-    //For services discovered. from Bluecove java docs
-    static final UUID OBEX_FILE_TRANSFER = new UUID(0x1106);
+//    RemoteDevice[] devs;
+    public ArrayList<RemoteDevice> devices;
+    public ArrayList<String> urls;
+    public ArrayList<RemoteDevice> devicesDiscovered;
+    private Scanner scan;
     public static final Vector/*<String>*/ serviceFound = new Vector();
 
     public BTConnection() {
+        scan = new Scanner(System.in);
+        devices = new ArrayList<>();
+        urls = new ArrayList<>();
+        devicesDiscovered = new ArrayList<>();
 
     }
 
-    public void discoverDevices() throws BluetoothStateException, InterruptedException {
+    //Catch these errors
+    public User pair() throws BluetoothStateException, InterruptedException, IOException {
+        discoverDevices();
+        if (devicesDiscovered == null) {
+            System.out.println("no devices in range");
+            return null;
+        }
+
+        for (int i = 0; i < devicesDiscovered.size(); i++) {
+            System.out.println("Would you like to pair the following device(yes or no)");
+            try {
+                System.out.println(devicesDiscovered.get(i).getFriendlyName(true));
+            } catch (IOException ex) {
+                //
+            }
+            if (scan.next().equals("yes")) {
+                if (devices.contains(devicesDiscovered.get(i))) {
+                    System.out.println("Already paired");
+                } else {
+                    discoverServices(devicesDiscovered.get(i));
+                    return new User(devicesDiscovered.get(i), urls.get(0),devicesDiscovered.get(i).getFriendlyName(true));
+                }
+            } else {
+                System.out.println("Item not added");
+            }
+
+        }
+        return null;
+    }
+
+    private void discoverDevices() throws BluetoothStateException, InterruptedException {
         final Object inquiryCompletedEvent = new Object();
-        devicesDiscovered.clear();
+        //devicesDiscovered.clear();
 
         DiscoveryListener listener = new DiscoveryListener() {
             public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-                System.out.println("Device " + btDevice.getBluetoothAddress() + " found");
-                devicesDiscovered.addElement(btDevice);
-                try {
-                    System.out.println("     name " + btDevice.getFriendlyName(false));
-                } catch (IOException cantGetDeviceName) {
-                }
+                //System.out.println("Device " + btDevice.getBluetoothAddress() + " found");
+                //devicesDiscovered.addElement(btDevice);
+                devicesDiscovered.add(btDevice);
+                //devices.add(btDevice);
+//                try {
+//                    System.out.println("     name " + btDevice.getFriendlyName(false));
+//                } catch (IOException cantGetDeviceName) {
+//                }
             }
 
             public void inquiryCompleted(int discType) {
-                System.out.println("Device Inquiry completed!");
+                //System.out.println("Device Inquiry completed!");
                 synchronized (inquiryCompletedEvent) {
                     inquiryCompletedEvent.notifyAll();
                 }
@@ -63,29 +100,28 @@ public class BTConnection {
         synchronized (inquiryCompletedEvent) {
             boolean started = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, listener);
             if (started) {
-                System.out.println("wait for device inquiry to complete...");
+                //System.out.println("wait for device inquiry to complete...");
                 inquiryCompletedEvent.wait();
-                System.out.println(devicesDiscovered.size() + " device(s) found");
+                //System.out.println(devicesDiscovered.size() + " device(s) found");
             }
         }
 
         //Returns an array of all remote devices that have been identified in a previous scan
-        LocalDevice ld = LocalDevice.getLocalDevice();
-        DiscoveryAgent agent = ld.getDiscoveryAgent();
-        devs = agent.retrieveDevices(DiscoveryAgent.CACHED);
-
+        //LocalDevice ld = LocalDevice.getLocalDevice();
+        //DiscoveryAgent agent = ld.getDiscoveryAgent();
+        //devices = agent.retrieveDevices(DiscoveryAgent.CACHED);
     }
 
-    public void discoverServices() throws IOException, InterruptedException {
+    private void discoverServices(RemoteDevice device) throws IOException, InterruptedException {
         // First run RemoteDeviceDiscovery and use discoved device
         //RemoteDeviceDiscovery.main(null);
-
+        urls.clear();
         serviceFound.clear();
 
         UUID[] serviceUUID = new UUID[1];
-        
+
         //0x1105 works for Matt's phone!!!!!!
-        serviceUUID[0] = new UUID(0x1115);
+        serviceUUID[0] = new UUID(0x1105);
 
         final Object serviceSearchCompletedEvent = new Object();
 
@@ -104,17 +140,18 @@ public class BTConnection {
                         continue;
                     }
                     serviceFound.add(url);
+                    urls.add(url);
                     DataElement serviceName = servRecord[i].getAttributeValue(0x0100);
                     if (serviceName != null) {
-                        System.out.println("service " + serviceName.getValue() + " found " + url);
+                        //System.out.println("service " + serviceName.getValue() + " found " + url);
                     } else {
-                        System.out.println("service found " + url);
+                        //System.out.println("service found " + url);
                     }
                 }
             }
 
             public void serviceSearchCompleted(int transID, int respCode) {
-                System.out.println("service search completed!");
+                //System.out.println("service search completed!");
                 synchronized (serviceSearchCompletedEvent) {
                     serviceSearchCompletedEvent.notifyAll();
                 }
@@ -127,36 +164,29 @@ public class BTConnection {
             0x0100 // Service name
         };
 
-        for (Enumeration en = devicesDiscovered.elements(); en.hasMoreElements();) {
-            RemoteDevice btDevice = (RemoteDevice) en.nextElement();
-
-            synchronized (serviceSearchCompletedEvent) {
-                System.out.println("search services on " + btDevice.getBluetoothAddress() + " " + btDevice.getFriendlyName(false));
-                LocalDevice.getLocalDevice().getDiscoveryAgent().searchServices(null, searchUuidSet, btDevice, listener);
-                serviceSearchCompletedEvent.wait();
-            }
+        synchronized (serviceSearchCompletedEvent) {
+            //System.out.println("search services on " + device.getBluetoothAddress() + " " + device.getFriendlyName(false));
+            LocalDevice.getLocalDevice().getDiscoveryAgent().searchServices(null, searchUuidSet, device, listener);
+            serviceSearchCompletedEvent.wait();
         }
 
     }
 
-    public void connect() throws IOException {
-//        System.out.println("printing addresses of identified devices");
-//        for (int i = 0; i < serviceFound.size(); i++) {
-//            System.out.println("Address " + i + ": " + serviceFound.elementAt(i));
-//        }
-
-//        try {
-//            TimeUnit.SECONDS.sleep(1);
-//        } catch (InterruptedException e) {
-//            //Handle exception
-//        }
-
-        ClientSession clientSession = (ClientSession) Connector.open((String) serviceFound.elementAt(1));
-        HeaderSet hsConnectReply = clientSession.connect(null);
-        if (hsConnectReply.getResponseCode() != ResponseCodes.OBEX_HTTP_OK) {
-            System.out.println("Failed to connect");
-        } else {
-            System.out.println("connected");
+    public boolean connect(User user) {
+        ClientSession clientSession;
+        HeaderSet hsConnectReply;
+        try {
+            clientSession = (ClientSession) Connector.open(user.address);
+            hsConnectReply = clientSession.connect(null);
+            
+            if (hsConnectReply.getResponseCode() != ResponseCodes.OBEX_HTTP_OK) {
+                return false;
+            } else {
+                clientSession.close();
+                return true;
+            }
+        } catch (IOException ex) {
+            return false;
         }
 
     }
