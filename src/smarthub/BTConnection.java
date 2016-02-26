@@ -23,7 +23,6 @@ import javax.obex.*;
 
 public class BTConnection {
 
-//    RemoteDevice[] devs;
     public ArrayList<RemoteDevice> devices;
     public ArrayList<String> urls;
     public ArrayList<RemoteDevice> devicesDiscovered;
