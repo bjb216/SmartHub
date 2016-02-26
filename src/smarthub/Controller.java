@@ -7,12 +7,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.bluetooth.BluetoothStateException;
+import org.json.JSONException;
 
 public class Controller {
 
     BTConnection con;
     ArrayList<User> users;
-    String[] menuItems = {"pair users", "current paired users", "Scan area", "exit"};
+    String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather","Calendar", "exit"};
     Scanner scan;
 
     public Controller() {
@@ -22,7 +23,7 @@ public class Controller {
         users = new ArrayList<>();
     }
 
-    public void run() throws InterruptedException, IOException {
+    public void run() throws InterruptedException, IOException, JSONException {
 
         while (true) {
             System.out.println("Welcome to SmartHub");
@@ -44,13 +45,26 @@ public class Controller {
                     scan();
                     break;
                 case 4:
+                    weather();
+                    break;
+                case 5:
+                    GCalendar cal= new GCalendar();
+                    cal.doStuff();
+                    break;
+                case 6:
                     System.out.println("goodbye");
                     System.exit(0);
             }
         }
 
     }
-
+    private void weather() throws IOException, JSONException{
+        System.out.println("testing weather function");
+        MyWeather w=new MyWeather("New York");
+        //w.doSomething();
+        w.getWeekly();
+    }
+    
     private void scan(){
         while(true){
             for(int i=0;i<users.size();i++){
