@@ -20,12 +20,13 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connector;
 import javax.obex.ClientSession;
+import org.json.JSONException;
 
 public class SmartHub {
     public static final String bjbid = "703EAC1A1042";
     public static final String mdbid = "10D542EFEC45";
 
-    public static void main(String[] args) throws BluetoothStateException, InterruptedException, IOException {
+    public static void main(String[] args) throws BluetoothStateException, InterruptedException, IOException, JSONException {
         Controller con = new Controller();
         con.run();
        
