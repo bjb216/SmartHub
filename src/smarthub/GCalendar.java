@@ -1,43 +1,52 @@
 package smarthub;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.*;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 
 public class GCalendar {
 
-    private ArrayList<String> meetings;
-    private String username;
-    private String password;
+    private ArrayList<Event> meetings;
+    private final com.google.api.services.calendar.Calendar calendar;
+    HttpTransport httpTransport;
+    JacksonFactory jsonFactory;
+    private final User user;
     private final String clientID = "239534582570-3rvd6phvksoe8mm028jm1u3h2eu1c3oo.apps.googleusercontent.com";
     private final String clientSecret = "6BvMtDTZm2AY0q370frrGpHa";
 
-    public GCalendar(String username, String password, String name) {
-        this.username = username;
-        this.password = password;
+    public GCalendar(User user) throws IOException {
+        this.user = user;
+        meetings = new ArrayList<>();
+        httpTransport = new NetHttpTransport();
+        jsonFactory = new JacksonFactory();
+        if (user.credential == null) {
+            System.out.println("Authenticating user: " + user.name);
+            createCredential(user);
+        } else {
+            System.out.println(user.name + " already is authenticated");
+        }
+        System.out.println("Attempting to create calendar");
+        calendar = new com.google.api.services.calendar.Calendar.Builder(
+                httpTransport, jsonFactory, user.credential)
+                .setApplicationName("SmartHub")
+                .build();
+        
+        
+        buildEvents();
     }
 
-    public GCalendar() {
-
-    }
-
-    public void doStuff() throws IOException {
-        HttpTransport httpTransport = new NetHttpTransport();
-        JacksonFactory jsonFactory = new JacksonFactory();
+    //To to handle errors, check for bad input
+    private void createCredential(User user) throws IOException {
         String redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
         String scope = "https://www.googleapis.com/auth/calendar";
 
@@ -45,7 +54,7 @@ public class GCalendar {
                 httpTransport, jsonFactory, clientID, clientSecret,
                 Arrays.asList(scope)).setAccessType("online")
                 .setApprovalPrompt("auto").build();
-        
+
         String url = flow.newAuthorizationUrl().setRedirectUri(redirectUrl).build();
         System.out.println("Please open the following URL in your browser then type the authorization code:");
 
@@ -53,19 +62,53 @@ public class GCalendar {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String code = br.readLine();
 
+        //Catch bad response
         GoogleTokenResponse response = flow.newTokenRequest(code)
                 .setRedirectUri(redirectUrl).execute();
+
+        GoogleCredential credential = new GoogleCredential().setFromTokenResponse(response);
+        user.setCredential(credential);
+    }
+    
+    private double roundUp(long number, long multiple){
+        return Math.ceil((number + multiple/2)/multiple)*multiple;
+    } 
+
+    private void buildEvents() throws IOException {
+        System.out.println("Printing " + user.name + " Calendar");
         
-        GoogleCredential credential = new GoogleCredential()
-                .setFromTokenResponse(response);
+        // List the next 10 events from the primary calendar.
+        DateTime now = new DateTime(System.currentTimeMillis());
+        long todayNum = now.getValue();
+        long dayNum = (1000*60*60*24);
+        long tomorrowNum = (long)(roundUp(todayNum, dayNum)+18000000);
+        DateTime tomorrow = new DateTime(tomorrowNum);
+        //System.out.println("dayNum: " + dayNum);
+        //System.out.println("tomorrowNum: " + tomorrowNum);
+        //System.out.println("Get Value now: " +now.getValue());
+        //System.out.println("Get Value tomorrow: " + tomorrow.getValue());
 
-// Create a new authorized API client
-        //Calendar service = new Calendar.Builder(httpTransport, jsonFactory,credential).build();
+        String pageToken = null;
+        do {
+            com.google.api.services.calendar.model.Events events = calendar.events().list("primary")
+                .setPageToken(pageToken)
+                .setTimeMin(now)
+                .setTimeMax(tomorrow)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .execute();
+            
+            meetings.addAll(events.getItems());
+            pageToken = events.getNextPageToken();
+        } while (pageToken != null);
 
     }
-
-    public ArrayList<String> getMeetings() {
-        return meetings;
+    
+    public void printCalendar(){
+        for(int i=0;i<meetings.size();i++){
+            System.out.println(meetings.get(i).getSummary());
+        }
     }
+
 
 }
