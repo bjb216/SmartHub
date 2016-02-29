@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package smarthub;
 
 import java.io.IOException;
@@ -15,10 +10,6 @@ import net.aksingh.owmjapis.DailyForecast.Forecast.Temperature;
 import net.aksingh.owmjapis.OpenWeatherMap;
 import org.json.JSONException;
 
-/**
- *
- * @author bartonb
- */
 public class MyWeather {
     public OpenWeatherMap owm;
     String city;
@@ -69,7 +60,7 @@ public class MyWeather {
     //public void
     
     public void doSomething() throws IOException, JSONException {
-        OpenWeatherMap owm = new OpenWeatherMap("457fbd57a1d3f89a7c4db388f84338bf");
+        //OpenWeatherMap owm = new OpenWeatherMap("457fbd57a1d3f89a7c4db388f84338bf");
         // getting current weather data for the "London" city
        //CurrentWeather cwd2 = owm.
         CurrentWeather cwd = owm.currentWeatherByCityName("Bethlehem");
