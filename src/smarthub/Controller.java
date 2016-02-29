@@ -4,23 +4,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.bluetooth.BluetoothStateException;
 import org.json.JSONException;
 
 public class Controller {
 
     BTConnection con;
     ArrayList<User> users;
-    String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather","Calendar", "exit"};
+    String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather","Calendar",
+        "Financial","Speech","exit"};
     Scanner scan;
 
     public Controller() {
         con = new BTConnection();
-        //initialize();
         scan = new Scanner(System.in);
         users = new ArrayList<>();
+        
+        //For testing purposes
+        users.add(new User("Brandon's Phone"));
     }
 
     public void run() throws InterruptedException, IOException, JSONException {
@@ -48,20 +48,35 @@ public class Controller {
                     weather();
                     break;
                 case 5:
-                    GCalendar cal= new GCalendar();
-                    cal.doStuff();
+                    GCalendar cal= new GCalendar(users.get(0));
+                    cal.printCalendar();
                     break;
                 case 6:
+                    financial();
+                    break;
+                case 7:
+                    TextToSpeech tts=new TextToSpeech("We are going to graduate");
+                    tts.speak();
+                    break;
+                case 8:
                     System.out.println("goodbye");
                     System.exit(0);
+                    break;
             }
         }
 
     }
+    
+    private void financial() throws IOException{
+        FinancialData data= new FinancialData(users.get(0));
+        data.printInfo();
+        
+    }
+    
     private void weather() throws IOException, JSONException{
         System.out.println("testing weather function");
         MyWeather w=new MyWeather("New York");
-        //w.doSomething();
+        w.doSomething();
         w.getWeekly();
     }
     
@@ -73,12 +88,12 @@ public class Controller {
                 }
                 else{
                     System.out.println(users.get(i).name+" not in range");
-                }
-                    
+                }        
             }
             delay(2);
         }
     }
+    
     private void delay(int time) {
         try {
             TimeUnit.SECONDS.sleep(time);
