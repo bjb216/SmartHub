@@ -2,12 +2,8 @@ package smarthub;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.Vector;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
@@ -26,7 +22,7 @@ public class BTConnection {
     public ArrayList<RemoteDevice> devices;
     public ArrayList<String> urls;
     public ArrayList<RemoteDevice> devicesDiscovered;
-    private Scanner scan;
+    private final Scanner scan;
     public static final Vector/*<String>*/ serviceFound = new Vector();
 
     public BTConnection() {
