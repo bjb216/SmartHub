@@ -12,9 +12,7 @@ public class User {
     
     //CHECK TOKEN REFRESH ISSUES
     public GoogleCredential credential;
-    
-    
-    
+   
     public User(RemoteDevice device,String address, String name){
         this.device=device;
         this.address=address;
