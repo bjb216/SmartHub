@@ -1,29 +1,59 @@
 package smarthub;
 
+import java.awt.FlowLayout;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
+import javax.swing.*;
 
 public class Controller {
 
     BTConnection con;
+    JFrame frame;
+
+    
     ArrayList<User> users;
     String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather","Calendar",
         "Financial","Speech","exit"};
     Scanner scan;
 
     public Controller() {
+        frame = new JFrame();
+        frame.setSize(300, 300);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
         con = new BTConnection();
         scan = new Scanner(System.in);
         users = new ArrayList<>();
-        
+        //JFrame 
         //For testing purposes
         users.add(new User("Brandon's Phone"));
     }
 
-    public void run() throws InterruptedException, IOException, JSONException {
+    public void run(){
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+        JLabel label = new JLabel("This is a label!");
+ 
+        JButton button = new JButton();
+        button.setText("Press me");
+        panel.add(label);
+        panel.add(button);
+        frame.add(panel);
+        
+
+        int i=0;
+        while(true){
+            i=(i+1)%menuItems.length;
+            button.setText(menuItems[i]);
+            delay(3);
+        }
+    }
+    
+    public void run2() throws InterruptedException, IOException, JSONException {
 
         while (true) {
             System.out.println("Welcome to SmartHub");
@@ -55,8 +85,8 @@ public class Controller {
                     financial();
                     break;
                 case 7:
-                    TextToSpeech tts=new TextToSpeech("We are going to graduate");
-                    tts.speak();
+                    //TextToSpeech tts=new TextToSpeech("We are going to graduate");
+                    //tts.speak();
                     break;
                 case 8:
                     System.out.println("goodbye");
