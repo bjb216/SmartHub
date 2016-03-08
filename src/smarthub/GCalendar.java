@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class GCalendar {
 
-    private ArrayList<Event> meetings;
+    public ArrayList<Event> meetings;
     private final com.google.api.services.calendar.Calendar calendar;
     HttpTransport httpTransport;
     JacksonFactory jsonFactory;
