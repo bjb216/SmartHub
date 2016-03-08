@@ -1,6 +1,9 @@
 package smarthub;
 
 import com.google.api.services.calendar.model.Event;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,8 +21,8 @@ public class Controller {
     String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather", "Calendar",
         "Financial", "Speech", "exit"};
     Scanner scan;
-    int height = 600;
-    int width = 600;
+    final int height = 500;
+    final int width = 1200;
 
     public Controller() throws InterruptedException, IOException {
         con = new BTConnection();
@@ -28,43 +31,38 @@ public class Controller {
 
         init();
         frame = new JFrame();
-        frame.setSize(height, width);
+        frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
+        frame.getContentPane().setLayout((new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS)));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(topPanel(width*7/8,height/8));
+        //frame.getContentPane().add(sidePanel(width/8,height*7/8));
+        //frame.setBackground(Color.blue);
+        //frame.pack();
         frame.setVisible(true);
-
-        //JFrame 
-        //For testing purposes
+        
     }
 
     private void init() throws InterruptedException, IOException {
-        User user = con.pair();
-        if (user != null) {
-            users.add(user);
-        }
-        //users.add(new User("Brandon's Phone"));
+//        User user = con.pair();
+//        if (user != null) {
+//            users.add(user);
+//        }
+        users.add(new User("Brandon's Phone"));
     }
 
     public void run() throws IOException {
 
-//        JPanel panel = new JPanel();
-//        panel.setLayout(new FlowLayout());
-//        JLabel label = new JLabel("This is a label!");
-//
-//        JButton button = new JButton();
-//        button.setText("Press me");
-//        panel.add(label);
-//        panel.add(button);
-//        frame.add(panel);
-        //boolean to check whether or not we need to change the frame
         boolean change = false;
 
         //wont work if higher order user enters the room
+        //check if user is the same as from the previous scan
         int i = 0;
         JPanel userPanel = null;
         while (true) {
-            //i = (i + 1) % 6;
-            User current = scan();
+            i = (i + 1) % 6;
+            //User current = scan();
+            User current = scanTest(i);
             if (current == null) {
                 System.out.println("removing");
                 frame.getContentPane().remove(userPanel);
@@ -73,7 +71,7 @@ public class Controller {
                 change = false;
             } else if (!change) {
                 System.out.println("creating jpanel");
-                userPanel = userPanel(current, height, width);
+                userPanel = userPanel(current, height*7/8, width*7/8);
                 frame.getContentPane().add(userPanel);
                 frame.revalidate();
                 frame.repaint();
@@ -85,17 +83,22 @@ public class Controller {
             delay(5);
         }
     }
+    
+    private User scanTest(int i){
+        if(i<4){
+            return users.get(0);
+        }
+        else{
+            return null;
+        }
+    }
 
-    private JPanel userPanel(User user, int height, int width) throws IOException {
+    private JPanel userPanel(User user, int width, int height) throws IOException {
         JPanel panel = new JPanel();
-        //panel.setLayout(new FlowLayout());
-        JLabel title = new JLabel("SmartHub");
-        JLabel name = new JLabel(user.name);
-        panel.add(title);
-        panel.add(name);
-
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.darkGray);
         //JPanel weatherPanel = weatherPanel(user,height/2,width);
-        JPanel calendarPanel = calendarPanel(user, height / 2, width);
+        JPanel calendarPanel = calendarPanel(user,width, height / 2);
         //panel.add(weatherPanel);
         panel.add(calendarPanel);
 
@@ -103,23 +106,54 @@ public class Controller {
 
     }
 
-    private JPanel weatherPanel(User user, int length, int width) {
+    private JPanel topPanel(int width, int height){
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+        panel.setMaximumSize(new Dimension(width,height));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        //panel.setPreferredSize(new Dimension(width,height/20));
+        
+        panel.setBackground(Color.red);
+        
+        JLabel title = new JLabel("SmartHub");
+        title.setPreferredSize(new Dimension(width/3,height));
+        
+        JLabel date = new JLabel("xx/xx/xxxx");
+        date.setPreferredSize(new Dimension(width/2,height));
+        
+        panel.add(title);
+        panel.add(date);
+        
+        return panel;
+    }
+    
+    private JPanel weatherPanel(User user, int width, int height) {
         JPanel panel = new JPanel();
 
         return null;
     }
-
-    private JPanel calendarPanel(User user, int height, int width) throws IOException {
+    
+    private JPanel sidePanel(int width, int height){
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
+        panel.setMaximumSize(new Dimension(width,height));
+        panel.setBackground(Color.cyan);
+        panel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        return panel;
+    }
+        
+    private JPanel calendarPanel(User user, int width, int height) throws IOException {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setMaximumSize(new Dimension(width,height));
+        panel.setBackground(Color.yellow);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         GCalendar cal = new GCalendar(user);
         ArrayList<Event> meetings = cal.meetings;
 
         for (int i = 0; i < meetings.size(); i++) {
             System.out.println("adding meeting: " + meetings.get(i).getSummary());
             JLabel label = new JLabel(meetings.get(i).getSummary());
-            //label.setLocation(i*height/meetings.size()+10, 10);
             panel.add(label);
         }
 

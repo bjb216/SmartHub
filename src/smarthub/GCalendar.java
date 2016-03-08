@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class GCalendar {
 
-    private ArrayList<Event> meetings;
+    public ArrayList<Event> meetings;
     private final com.google.api.services.calendar.Calendar calendar;
     HttpTransport httpTransport;
     JacksonFactory jsonFactory;
@@ -75,7 +75,7 @@ public class GCalendar {
     } 
 
     private void buildEvents() throws IOException {
-        System.out.println("Printing " + user.name + " Calendar");
+        //System.out.println("Printing " + user.name + " Calendar");
         
         // List the next 10 events from the primary calendar.
         DateTime now = new DateTime(System.currentTimeMillis());

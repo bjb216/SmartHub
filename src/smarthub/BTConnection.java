@@ -180,7 +180,8 @@ public class BTConnection {
                 clientSession.close();
                 return true;
             }
-        } catch (IOException ex) {
+           //Catching all exceptions. used to be an IO exception 
+        } catch (Exception ex) {
             return false;
         }
 
