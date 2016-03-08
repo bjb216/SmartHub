@@ -1,5 +1,6 @@
 package smarthub;
 
+import com.google.api.services.calendar.model.Event;
 import java.awt.FlowLayout;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,46 +14,122 @@ public class Controller {
     BTConnection con;
     JFrame frame;
 
-    
     ArrayList<User> users;
-    String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather","Calendar",
-        "Financial","Speech","exit"};
+    String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather", "Calendar",
+        "Financial", "Speech", "exit"};
     Scanner scan;
+    int height = 600;
+    int width = 600;
 
-    public Controller() {
-        frame = new JFrame();
-        frame.setSize(300, 300);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+    public Controller() throws InterruptedException, IOException {
         con = new BTConnection();
         scan = new Scanner(System.in);
         users = new ArrayList<>();
+
+        init();
+        frame = new JFrame();
+        frame.setSize(height, width);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
         //JFrame 
         //For testing purposes
-        users.add(new User("Brandon's Phone"));
     }
 
-    public void run(){
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout());
-        JLabel label = new JLabel("This is a label!");
- 
-        JButton button = new JButton();
-        button.setText("Press me");
-        panel.add(label);
-        panel.add(button);
-        frame.add(panel);
-        
+    private void init() throws InterruptedException, IOException {
+        User user = con.pair();
+        if (user != null) {
+            users.add(user);
+        }
+        //users.add(new User("Brandon's Phone"));
+    }
 
-        int i=0;
-        while(true){
-            i=(i+1)%menuItems.length;
-            button.setText(menuItems[i]);
-            delay(3);
+    public void run() throws IOException {
+
+//        JPanel panel = new JPanel();
+//        panel.setLayout(new FlowLayout());
+//        JLabel label = new JLabel("This is a label!");
+//
+//        JButton button = new JButton();
+//        button.setText("Press me");
+//        panel.add(label);
+//        panel.add(button);
+//        frame.add(panel);
+        //boolean to check whether or not we need to change the frame
+        boolean change = false;
+
+        //wont work if higher order user enters the room
+        int i = 0;
+        JPanel userPanel = null;
+        while (true) {
+            //i = (i + 1) % 6;
+            User current = scan();
+            if (current == null) {
+                System.out.println("removing");
+                frame.getContentPane().remove(userPanel);
+                frame.revalidate();
+                frame.repaint();
+                change = false;
+            } else if (!change) {
+                System.out.println("creating jpanel");
+                userPanel = userPanel(current, height, width);
+                frame.getContentPane().add(userPanel);
+                frame.revalidate();
+                frame.repaint();
+                change = true;
+            }
+            else{
+                System.out.println("still in range");
+            }
+            delay(5);
         }
     }
-    
+
+    private JPanel userPanel(User user, int height, int width) throws IOException {
+        JPanel panel = new JPanel();
+        //panel.setLayout(new FlowLayout());
+        JLabel title = new JLabel("SmartHub");
+        JLabel name = new JLabel(user.name);
+        panel.add(title);
+        panel.add(name);
+
+        //JPanel weatherPanel = weatherPanel(user,height/2,width);
+        JPanel calendarPanel = calendarPanel(user, height / 2, width);
+        //panel.add(weatherPanel);
+        panel.add(calendarPanel);
+
+        return panel;
+
+    }
+
+    private JPanel weatherPanel(User user, int length, int width) {
+        JPanel panel = new JPanel();
+
+        return null;
+    }
+
+    private JPanel calendarPanel(User user, int height, int width) throws IOException {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        GCalendar cal = new GCalendar(user);
+        ArrayList<Event> meetings = cal.meetings;
+
+        for (int i = 0; i < meetings.size(); i++) {
+            System.out.println("adding meeting: " + meetings.get(i).getSummary());
+            JLabel label = new JLabel(meetings.get(i).getSummary());
+            //label.setLocation(i*height/meetings.size()+10, 10);
+            panel.add(label);
+        }
+
+        return panel;
+    }
+
+    private JPanel stockPanel() {
+        return null;
+    }
+
     public void run2() throws InterruptedException, IOException, JSONException {
 
         while (true) {
@@ -78,7 +155,7 @@ public class Controller {
                     weather();
                     break;
                 case 5:
-                    GCalendar cal= new GCalendar(users.get(0));
+                    GCalendar cal = new GCalendar(users.get(0));
                     cal.printCalendar();
                     break;
                 case 6:
@@ -96,34 +173,30 @@ public class Controller {
         }
 
     }
-    
-    private void financial() throws IOException{
-        FinancialData data= new FinancialData(users.get(0));
+
+    private void financial() throws IOException {
+        FinancialData data = new FinancialData(users.get(0));
         data.printInfo();
-        
+
     }
-    
-    private void weather() throws IOException, JSONException{
+
+    private void weather() throws IOException, JSONException {
         System.out.println("testing weather function");
-        MyWeather w=new MyWeather("New York");
+        MyWeather w = new MyWeather("New York");
         w.doSomething();
         w.getWeekly();
     }
-    
-    private void scan(){
-        while(true){
-            for(int i=0;i<users.size();i++){
-                if(con.connect(users.get(i))){
-                    System.out.println(users.get(i).name+" in range");
-                }
-                else{
-                    System.out.println(users.get(i).name+" not in range");
-                }        
+
+    private User scan() {
+//        return users.get(0);
+        for (int i = 0; i < users.size(); i++) {
+            if (con.connect(users.get(i))) {
+                return users.get(i);
             }
-            delay(2);
         }
+        return null;
     }
-    
+
     private void delay(int time) {
         try {
             TimeUnit.SECONDS.sleep(time);
