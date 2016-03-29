@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -12,6 +14,14 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import javax.swing.*;
 
+/**
+ * *GENERAL NOTES*** Box layout causes size of panel to be that of contents.
+ * flow layout does not.
+ *
+ *
+ *
+ *
+ */
 public class Controller {
 
     BTConnection con;
@@ -25,9 +35,10 @@ public class Controller {
     Scanner scan;
     final int height = 500;
     final int width = 1200;
-    
 
     public Controller() throws InterruptedException, IOException {
+        TTS test = new TTS();
+        test.doSomething();
         con = new BTConnection();
         scan = new Scanner(System.in);
         users = new ArrayList<>();
@@ -43,17 +54,13 @@ public class Controller {
 
         body = bodyPanel(width, height * 7 / 8);
 
-        //*****!*!*!*!*! change layouts from flow to something else. it is inserting spaces
-        
         frame.getContentPane().add(body);
 
         user = bodyPanel(width * 7 / 8, height * 7 / 8);
         body.add(user);
-        body.add(sidePanel(width / 8 - 5, height * 7 / 8));
-        //body.add(user);
-        //body.add(topPanel(width/8,height*7/8));
+        body.add(sidePanel(width / 8, height * 7 / 8));
 
-        frame.setBackground(Color.blue);
+        //frame.setBackground(Color.blue);
         //frame.pack();
         frame.setVisible(true);
 
@@ -64,7 +71,11 @@ public class Controller {
 //        if (user != null) {
 //            users.add(user);
 //        }
-        users.add(new User("Brandon's Phone"));
+        users.add(new User("Brandon"));
+        users.add(new User("Matt"));
+        users.add(new User("Jane"));
+        users.add(new User("John"));
+        users.add(new User("Jenna"));
     }
 
     public void run() throws IOException {
@@ -110,12 +121,13 @@ public class Controller {
     private JPanel userPanel(User user, int width, int height) throws IOException {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        //panel.setBackground(Color.darkGray);
+        panel.setPreferredSize(new Dimension(width, height));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        //JPanel weatherPanel = weatherPanel(user,height/2,width);
+        //JPanel weatherPanel = weatherPanel(user, width, height/2);
         //panel.add(weatherPanel);
-        //JPanel calendarPanel = calendarPanel(user,width, height / 2);
-        //panel.add(calendarPanel);
+        JPanel calendarPanel = calendarPanel(user, width, height / 2);
+        panel.add(calendarPanel);
         JPanel stockPanel = stockPanel(user, width, height / 2);
         panel.add(stockPanel);
 
@@ -129,7 +141,8 @@ public class Controller {
         panel.setPreferredSize(new Dimension(width, height));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        panel.setBackground(Color.red);
+        //Dark blue
+        panel.setBackground(new Color(33, 83, 129));
 
         JLabel title = new JLabel("SmartHub");
         title.setPreferredSize(new Dimension(width / 3, height));
@@ -143,17 +156,24 @@ public class Controller {
         return panel;
     }
 
-    private JPanel weatherPanel(User user, int width, int height) {
-        JPanel panel = new JPanel();
-
-        return null;
-    }
-
-    private JPanel bodyPanel(int width, int height) {
+    private JPanel weatherPanel(User user, int width, int height) throws IOException {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
         panel.setPreferredSize(new Dimension(width, height));
-        panel.setBackground(Color.YELLOW);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setBackground(Color.MAGENTA);
+
+        return panel;
+    }
+
+    //Yellow
+    private JPanel bodyPanel(int width, int height) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        panel.setPreferredSize(new Dimension(width, height));
+
+        //Light gray
+        panel.setBackground(new Color(217, 217, 217));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         return panel;
     }
@@ -163,35 +183,64 @@ public class Controller {
         //panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setLayout(new FlowLayout());
         panel.setPreferredSize(new Dimension(width, height));
-        panel.setBackground(Color.cyan);
+
+        //Slightly lighter blue than top
+        panel.setBackground(new Color(46, 117, 182));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        
-        JLabel title = new JLabel("SmartHub");
-        title.setPreferredSize(new Dimension(width / 3, height));
+        JLabel label = new JLabel("initial");
+        panel.add(label);
 
-        JLabel date = new JLabel("xx/xx/xxxx");
-        date.setPreferredSize(new Dimension(width / 2, height));
+        for (int i = 0; i < users.size(); i++) {
+            JButton button = new JButton(users.get(i).name);
+            panel.add(button);
 
-        panel.add(title);
-        panel.add(date);
-        
-        
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    label.setText(button.getText() + " pressed");
+                }
+            });
+        }
+        JButton button = new JButton("Pair");
+        panel.add(button);
+
         return panel;
     }
 
+    //Orange
     private JPanel calendarPanel(User user, int width, int height) throws IOException {
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setMaximumSize(new Dimension(width, height));
-        panel.setBackground(Color.yellow);
+        panel.setLayout(new FlowLayout());
+        panel.setPreferredSize(new Dimension(width, height));
+        panel.setBackground(Color.ORANGE);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         GCalendar cal = new GCalendar(user);
         ArrayList<Event> meetings = cal.meetings;
 
+        JLabel label = new JLabel("Time");
+        label.setPreferredSize(new Dimension(width /4, height/10));
+        panel.add(label);
+
+        label = new JLabel("Title");
+        label.setPreferredSize(new Dimension(width / 4, height/10));
+        panel.add(label);
+        
+        label = new JLabel("Location");
+        label.setPreferredSize(new Dimension(width / 4, height/10));
+        panel.add(label);
+        
         for (int i = 0; i < meetings.size(); i++) {
-            System.out.println("adding meeting: " + meetings.get(i).getSummary());
-            JLabel label = new JLabel(meetings.get(i).getSummary());
+            //JLabel label = new JLabel(cal.getTime(meetings.get(i))+meetings.get(i).getSummary()+" "+meetings.get(i).getLocation());
+            label = new JLabel(cal.getTime(meetings.get(i)));
+            label.setPreferredSize(new Dimension(width / 4, height/10));
+            panel.add(label);
+            
+            label = new JLabel(meetings.get(i).getSummary());
+            label.setPreferredSize(new Dimension(width / 4, height/10));
+            panel.add(label);
+            
+            label = new JLabel(meetings.get(i).getLocation());
+            label.setPreferredSize(new Dimension(width / 4, height/10));
             panel.add(label);
         }
 
@@ -200,9 +249,11 @@ public class Controller {
 
     private JPanel stockPanel(User user, int width, int height) throws IOException {
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setLayout(new FlowLayout());
         panel.setPreferredSize(new Dimension(width, height));
-        panel.setBackground(Color.green);
+
+        //slightly darker gray
+        panel.setBackground(new Color(148, 148, 148));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         for (int i = 0; i < user.stocks.length; i++) {
@@ -211,10 +262,6 @@ public class Controller {
         }
 
         return panel;
-    }
-
-    private JPanel stockPanel() {
-        return null;
     }
 
     public void run2() throws InterruptedException, IOException, JSONException {
