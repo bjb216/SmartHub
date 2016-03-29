@@ -11,8 +11,12 @@ import com.google.api.services.calendar.model.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 
 public class GCalendar {
 
@@ -101,6 +105,7 @@ public class GCalendar {
             meetings.addAll(events.getItems());
             pageToken = events.getNextPageToken();
         } while (pageToken != null);
+        
 
     }
     
@@ -110,5 +115,16 @@ public class GCalendar {
         }
     }
 
+    public String getTime(Event evt){
+        Date start = new Date(evt.getStart().getDateTime().getValue());
+        Date end = new Date(evt.getEnd().getDateTime().getValue());
+
+        String startTime=new SimpleDateFormat("hh:mm a",Locale.US).format(start);
+        String endTime=new SimpleDateFormat("hh:mm a",Locale.US).format(end);
+        
+        System.out.println(startTime +" - "+endTime);
+        
+        return startTime +" - "+endTime;
+    }
 
 }
