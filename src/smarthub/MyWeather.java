@@ -17,6 +17,8 @@ public class MyWeather {
     public OpenWeatherMap owm;
     String city;
 
+    
+    
     //Constructer
     public MyWeather(String city) {
         owm = new OpenWeatherMap("457fbd57a1d3f89a7c4db388f84338bf");
