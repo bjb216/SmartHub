@@ -17,6 +17,7 @@ import javax.microedition.io.Connector;
 import javax.obex.ClientSession;
 import javax.obex.*;
 
+
 public class BTConnection {
 
     public ArrayList<RemoteDevice> devices;
