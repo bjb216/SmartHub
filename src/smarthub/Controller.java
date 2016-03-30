@@ -318,7 +318,7 @@ public class Controller {
         System.out.println("testing weather function");
         MyWeather w = new MyWeather("New York");
         w.doSomething();
-        w.getWeekly();
+        //w.getWeekly();
     }
 
     private User scan() {

@@ -29,13 +29,13 @@ public class TTS {
     public void doSomething() throws IOException {
         init();
 
-        String outputFileName = "/tmp/speech.mp3";
+        String outputFileName = "/Users/bartonb/speech.mp3";
         CreateSpeechRequest createSpeechRequest = new CreateSpeechRequest();
         Input input = new Input();
         Voice voice = new Voice();
 
         voice.setName("Salli");
-        input.setData("This is a sample text to be synthesized.");
+        input.setData("Good morning Matt. Welcome to SmartHub");
 
         createSpeechRequest.setInput(input);
         createSpeechRequest.setVoice(voice);
