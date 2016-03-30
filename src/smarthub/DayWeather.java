@@ -28,6 +28,8 @@ public class DayWeather {
         
     }
     
+    
+    
     public Date getDay(){
         return date;
     }
