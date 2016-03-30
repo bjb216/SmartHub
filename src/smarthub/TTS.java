@@ -26,6 +26,8 @@ public class TTS {
         speechCloud.setEndpoint("https://tts.eu-west-1.ivonacloud.com");
     }
 
+    
+    
     public void doSomething() throws IOException {
         init();
 
