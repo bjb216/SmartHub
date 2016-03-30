@@ -4,6 +4,8 @@ package smarthub;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 
+
+
 public class IvonaCredentials implements AWSCredentialsProvider{
 
 public IvonaCredentials(String mSecretKey, String mAccessKey) {
