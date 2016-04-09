@@ -46,8 +46,8 @@ public class MyWeather {
         float pressure;
         Date date;
         float wind;
-        float highTemp;
-        float lowTemp;
+        int highTemp;
+        int lowTemp;
 
         System.out.println(c.getCityName() + " " + c.getCountryCode());
         //System.out.println(daily.getCityInstance());
@@ -63,8 +63,8 @@ public class MyWeather {
             pressure = ft.getPressure();
             date = ft.getDateTime();
             wind = ft.getWindSpeed();
-            highTemp = t.getMaximumTemperature();
-            lowTemp = t.getMinimumTemperature();
+            highTemp = (int) t.getMaximumTemperature();
+            lowTemp = (int) t.getMinimumTemperature();
 
             DayWeather tempDay = new DayWeather(date, weather, humidity, pressure, highTemp, lowTemp, wind);
 
@@ -102,8 +102,8 @@ public class MyWeather {
             float pressure = ft.getPressure();
             Date date = ft.getDateTime();
             float wind = ft.getWindSpeed();
-            float highTemp = t.getMaximumTemperature();
-            float lowTemp = t.getMinimumTemperature();
+            int highTemp = (int) t.getMaximumTemperature();
+            int lowTemp = (int) t.getMinimumTemperature();
 
             DayWeather newDay = new DayWeather(date, weather, humidity, pressure, highTemp, lowTemp, wind);
             newDay.printForecast();
