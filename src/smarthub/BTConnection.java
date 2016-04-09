@@ -1,5 +1,9 @@
 package smarthub;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Label;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -16,7 +20,12 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.obex.ClientSession;
 import javax.obex.*;
-
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 public class BTConnection {
 
@@ -35,29 +44,32 @@ public class BTConnection {
     }
 
     //Catch these errors
-    public User pair() throws BluetoothStateException, InterruptedException, IOException {
+    public User pair(JPanel user,JFrame frame) throws BluetoothStateException, InterruptedException, IOException {
+        System.out.println("pair called");
         discoverDevices();
-        if (devicesDiscovered == null) {
-            System.out.println("no devices in range");
+        System.out.println("returned from discoverDevices");
+        if (devicesDiscovered == null || devicesDiscovered.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "No Devices in range");
             return null;
         }
 
         for (int i = 0; i < devicesDiscovered.size(); i++) {
-            System.out.println("Would you like to pair the following device(yes or no)");
-            try {
-                System.out.println(devicesDiscovered.get(i).getFriendlyName(true));
-            } catch (IOException ex) {
-                //
-            }
-            if (scan.next().equals("yes")) {
+            String message ="Would you like to pair device: "+ devicesDiscovered.get(i).getFriendlyName(true);
+            int reply = JOptionPane.showConfirmDialog(frame, message, null, JOptionPane.YES_NO_OPTION);
+
+            if (reply==JOptionPane.YES_OPTION) {
                 if (devices.contains(devicesDiscovered.get(i))) {
-                    System.out.println("Already paired");
+                    JOptionPane.showMessageDialog(frame, "Device already Paired");
                 } else {
                     discoverServices(devicesDiscovered.get(i));
-                    return new User(devicesDiscovered.get(i), urls.get(0),devicesDiscovered.get(i).getFriendlyName(true));
+                    System.out.println("adding new user");
+                    System.out.println(urls.get(0));
+                    devices.add(devicesDiscovered.get(i));
+                    JOptionPane.showMessageDialog(frame, "Device added");
+                    return new User(devicesDiscovered.get(i), urls.get(0), devicesDiscovered.get(i).getFriendlyName(true));
                 }
             } else {
-                System.out.println("Item not added");
+                JOptionPane.showMessageDialog(frame, "Device not added");
             }
 
         }
@@ -66,7 +78,7 @@ public class BTConnection {
 
     private void discoverDevices() throws BluetoothStateException, InterruptedException {
         final Object inquiryCompletedEvent = new Object();
-        //devicesDiscovered.clear();
+        devicesDiscovered.clear();
 
         DiscoveryListener listener = new DiscoveryListener() {
             public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
@@ -174,14 +186,14 @@ public class BTConnection {
         try {
             clientSession = (ClientSession) Connector.open(user.address);
             hsConnectReply = clientSession.connect(null);
-            
+
             if (hsConnectReply.getResponseCode() != ResponseCodes.OBEX_HTTP_OK) {
                 return false;
             } else {
                 clientSession.close();
                 return true;
             }
-           //Catching all exceptions. used to be an IO exception 
+            //Catching all exceptions. used to be an IO exception 
         } catch (Exception ex) {
             return false;
         }
