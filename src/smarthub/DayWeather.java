@@ -15,13 +15,16 @@ public class DayWeather {
     public String weatherDescription;
     public float humidity;
     public float pressure;
-    public float maxTemp;
-    public float minTemp;
+    public int maxTemp;
+    public int minTemp;
     public float windSpeed;
     public String imagePath;
+    public String brandonPath = "/users/bartonb/Documents/GUIpics";
+    public String mattPath = "/Users/Matthew/Documents/Senior Design/Weather Pics";
+    public String testPath = brandonPath;
 
     //Creating the Day constructor
-    public DayWeather(Date day, String weather, float hum, float press, float max, float min, float wind) {
+    public DayWeather(Date day, String weather, float hum, float press, int max, int min, float wind) {
         date = day;
         weatherDescription = weather;
         humidity = hum;
@@ -53,11 +56,11 @@ public class DayWeather {
     }
 
     public String getMaxTemp() {
-        return Float.toString(maxTemp);
+        return Integer.toString(maxTemp);
     }
 
     public String getMinTemp() {
-        return Float.toString(minTemp);
+        return Integer.toString(minTemp);
     }
 
     public String getWindSpeed() {
@@ -71,7 +74,7 @@ public class DayWeather {
 
         switch (description.toLowerCase()) {
             case "clear sky":
-                pngPath = "/users/bartonb/Documents/WeatherPics/Sunny.png";
+                pngPath = testPath + "/Sunny.png";
                 break;
             //Snow    
             case "light snow":
@@ -84,7 +87,7 @@ public class DayWeather {
             case "light shower snow":
             case "shower snow":
             case "heavy shower snow":
-                pngPath = "/users/bartonb/Documents/WeatherPics/Snow.png";
+                pngPath =testPath +  "/Snow.png";
                 break;
 
             case "light rain":
@@ -97,7 +100,7 @@ public class DayWeather {
             case "shower rain":
             case "heavy intensity shower rain":
             case "ragged shower rain":
-                pngPath = "/users/bartonb/Documents/WeatherPics/Drizzle.png";
+                pngPath = testPath + "/Drizzle.png";
                 break;
 
             case "thunderstorm with light rain":
@@ -110,7 +113,7 @@ public class DayWeather {
             case "thunderstorm with light drizzle":
             case "thunderstorm with drizzle":
             case "thunderstorm with heavy drizzle":
-                pngPath = "/users/bartonb/Documents/WeatherPics/Thunderstorms.png";
+                pngPath = testPath + "/Thunderstorms.png";
                 break;
 
             case "mist":
@@ -124,18 +127,18 @@ public class DayWeather {
             case "volcanic ash":
             case "squalls":
             case "tornado":
-                pngPath = "/users/bartonb/Documents/WeatherPics/Haze.png";
+                pngPath = testPath + "/Haze.png";
                 break;
 
             case "few clouds":
             case "scattered clouds":
             case "broken clouds":
             case "overcast clouds":
-                pngPath = "/users/bartonb/Documents/WeatherPics/Cloudy.png";
+                pngPath = testPath + "/Cloudy.png";
                 break;
 
             default:
-                pngPath = "/users/bartonb/Documents/WeatherPics/Sunny.png";
+                pngPath = testPath + "/Sunny.png";
                 break;
         }
 
