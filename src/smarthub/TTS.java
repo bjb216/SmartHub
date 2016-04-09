@@ -1,15 +1,20 @@
 package smarthub;
 
-import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
+import com.amazonaws.AmazonClientException;
 import com.ivona.services.tts.IvonaSpeechCloudClient;
 import com.ivona.services.tts.model.CreateSpeechRequest;
 import com.ivona.services.tts.model.CreateSpeechResult;
 import com.ivona.services.tts.model.Input;
 import com.ivona.services.tts.model.Voice;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
 
 public class TTS {
 
@@ -18,26 +23,23 @@ public class TTS {
 
     private static IvonaSpeechCloudClient speechCloud;
 
-    private static void init() {
+    public TTS() {
         speechCloud = new IvonaSpeechCloudClient(new IvonaCredentials(secretKey, accessKey));
-        //speechCloud = new IvonaSpeechCloudClient(new IvonaCredentials("secretKey", "accessKey"));
-       
-        //speechCloud = new IvonaSpeechCloudClient(new ClasspathPropertiesFileCredentialsProvider("resources/IvonaCredentials.properties"));
         speechCloud.setEndpoint("https://tts.eu-west-1.ivonacloud.com");
     }
-
     
-    public void doSomething() throws IOException {
-        init();
+    public void speak(String textIn)  {
 
-        String outputFileName = "/tmp/speech.mp3";
+        String outputFileName = "/users/bartonb/speech.mp3";
+        //String outputFileName = "/home/pi/music/sound.mp3";
         CreateSpeechRequest createSpeechRequest = new CreateSpeechRequest();
         Input input = new Input();
         Voice voice = new Voice();
 
-        voice.setName("Salli");
-        input.setData("This is a sample text to be synthesized.");
-
+        voice.setName("Emma");
+        //voice.setName("Celine");
+        //input.setData("Good morning Brandon");
+        input.setData(textIn);
         createSpeechRequest.setInput(input);
         createSpeechRequest.setVoice(voice);
         InputStream in = null;
@@ -47,14 +49,6 @@ public class TTS {
 
             CreateSpeechResult createSpeechResult = speechCloud.createSpeech(createSpeechRequest);
 
-            System.out.println("\nSuccess sending request:");
-            System.out.println(" content type:\t" + createSpeechResult.getContentType());
-            System.out.println(" request id:\t" + createSpeechResult.getTtsRequestId());
-            System.out.println(" request chars:\t" + createSpeechResult.getTtsRequestCharacters());
-            System.out.println(" request units:\t" + createSpeechResult.getTtsRequestUnits());
-
-            System.out.println("\nStarting to retrieve audio stream:");
-
             in = createSpeechResult.getBody();
             outputStream = new FileOutputStream(new File(outputFileName));
 
@@ -62,20 +56,32 @@ public class TTS {
             int readBytes;
 
             while ((readBytes = in.read(buffer)) > 0) {
-                // In the example we are only printing the bytes counter,
-                // In real-life scenario we would operate on the buffer
-                System.out.println(" received bytes: " + readBytes);
                 outputStream.write(buffer, 0, readBytes);
             }
 
-            System.out.println("\nFile saved: " + outputFileName);
+            FileInputStream fis = new FileInputStream(outputFileName);
+            Player playMP3 = new Player(fis);
 
-        } finally {
+            playMP3.play();
+
+        }
+        catch(AmazonClientException | IOException | JavaLayerException e){
+            
+        }
+        finally {
             if (in != null) {
-                in.close();
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(TTS.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             if (outputStream != null) {
-                outputStream.close();
+                try {
+                    outputStream.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(TTS.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
