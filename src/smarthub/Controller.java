@@ -5,45 +5,52 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONException;
 import javax.swing.*;
 
-
-
 /**
  * *GENERAL NOTES*** Box layout causes size of panel to be that of contents.
- * flow layout does not.
- *
- *
+ * flow layout does not. need to fix BT device already found functionality
+ *Change file path
  *
  *
  */
 public class Controller {
 
     BTConnection con;
+    TTS tts;
     JFrame frame;
     JPanel body;
     JPanel user;
+    boolean pause;
 
     ArrayList<User> users;
     String[] menuItems = {"Pair users", "Current paired users", "Scan area", "Weather", "Calendar",
         "Financial", "Speech", "exit"};
     Scanner scan;
-    final int height = 500;
-    final int width = 1200;
+    //final int height = 480;
+    //final int width = 800;
+
+    final int height = 400;
+    final int width = 900;
+    ArrayList<String> text;
 
     public Controller() throws InterruptedException, IOException {
-        TTS test = new TTS();
-        test.doSomething();
+        pause = false;
+        tts = new TTS();
         con = new BTConnection();
         scan = new Scanner(System.in);
         users = new ArrayList<>();
+        text = new ArrayList<>();
 
         init();
         frame = new JFrame();
@@ -70,17 +77,18 @@ public class Controller {
 
     private void init() throws InterruptedException, IOException {
 //        User user = con.pair();
-//        if (user != null) {
-//            users.add(user);
-//        }
+        //      if (user != null) {
+        //        users.add(user);
+        //  }
+
         users.add(new User("Brandon"));
+
         users.add(new User("Matt"));
-        users.add(new User("Jane"));
-        users.add(new User("John"));
         users.add(new User("Jenna"));
+
     }
 
-    public void run() throws IOException {
+    public void run() throws IOException, JSONException {
 
         boolean change = false;
 
@@ -89,47 +97,66 @@ public class Controller {
         int i = 0;
         JPanel userPanel = null;
         while (true) {
+            System.out.println("number of users: " + users.size());
             i = (i + 1) % 6;
             //User current = scan();
             User current = scanTest(i);
-            if (current == null) {
-                System.out.println("removing");
+            if (current == null && pause == false && change) {
+                //System.out.println("removing");
                 user.remove(userPanel);
                 user.revalidate();
                 user.repaint();
                 change = false;
-            } else if (!change) {
-                System.out.println("creating jpanel");
+            } else if (!change && pause == false && current != null) {
+                text.clear();
                 userPanel = userPanel(current, width * 7 / 8, height * 7 / 8);
                 user.add(userPanel);
                 user.revalidate();
                 user.repaint();
                 change = true;
+                //createTTS(current);
+
             } else {
-                System.out.println("still in range");
+                //System.out.println("still in range");
             }
             delay(2);
         }
     }
 
+    private void createTTS(User user) {
+        int i = 0;
+        String message = "Hello" + user.name + ". You have" + text.get(i) + " events on your calendar for the rest of today. ";
+        System.out.println(text.get(i));
+        if (!text.get(i).equals("0")) {
+            System.out.println("in if");
+            i++;
+            message = message.concat("Your first event is " + text.get(i) + " at");
+            i++;
+            message = message.concat(text.get(i));
+        }
+        tts.speak(message);
+
+    }
+
     private User scanTest(int i) {
-        if (i < 4) {
+        if (i < 40) {
             return users.get(0);
         } else {
             return null;
         }
     }
 
-    private JPanel userPanel(User user, int width, int height) throws IOException {
+    private JPanel userPanel(User user, int width, int height) throws IOException, JSONException {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setPreferredSize(new Dimension(width, height));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        //JPanel weatherPanel = weatherPanel(user, width, height/2);
-        //panel.add(weatherPanel);
-        JPanel calendarPanel = calendarPanel(user, width, height / 2);
-        panel.add(calendarPanel);
+        //JPanel calendarPanel = calendarPanel(user, width, height / 2);
+        //panel.add(calendarPanel);
+        JPanel weatherPanel = weatherPanel(user, width, height / 2);
+        panel.add(weatherPanel);
+
         JPanel stockPanel = stockPanel(user, width, height / 2);
         panel.add(stockPanel);
 
@@ -138,6 +165,8 @@ public class Controller {
     }
 
     private JPanel topPanel(int width, int height) {
+        Font font= new Font("Verdana",Font.BOLD,20);
+        
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
         panel.setPreferredSize(new Dimension(width, height));
@@ -147,10 +176,17 @@ public class Controller {
         panel.setBackground(new Color(33, 83, 129));
 
         JLabel title = new JLabel("SmartHub");
-        title.setPreferredSize(new Dimension(width / 3, height));
+        title.setPreferredSize(new Dimension((int) (width / 2.5), height));
+        title.setFont(font);
+        title.setForeground(Color.WHITE);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel date = new JLabel("xx/xx/xxxx");
-        date.setPreferredSize(new Dimension(width / 2, height));
+        JLabel date = new JLabel("Thursday April 7     11:24AM");
+        date.setPreferredSize(new Dimension((int) (width / 2.5), height));
+        date.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        
+        date.setFont(font);
+        date.setForeground(Color.WHITE);
 
         panel.add(title);
         panel.add(date);
@@ -158,12 +194,73 @@ public class Controller {
         return panel;
     }
 
-    private JPanel weatherPanel(User user, int width, int height) throws IOException {
+    private JPanel weatherPanel(User user, int width, int height) throws IOException, JSONException {
+        Color c=new Color(130,130,130);
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
         panel.setPreferredSize(new Dimension(width, height));
+        panel.setBackground(c);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setBackground(Color.MAGENTA);
+
+        //Inserting Weather from the Weather class
+        ArrayList<DayWeather> multiForecast = new ArrayList<DayWeather>();
+        MyWeather w = new MyWeather("New York");
+        w.multiDayForecast(multiForecast, 7);
+        w.printMultiDayForecast(multiForecast);
+
+        for (int i = 0; i < multiForecast.size(); i++) {
+            JPanel dayPanel = new JPanel();
+            dayPanel.setLayout(new BoxLayout(dayPanel, BoxLayout.PAGE_AXIS));
+            //dayPanel.setLayout(new FlowLayout());
+            dayPanel.setPreferredSize(new Dimension(width / 8, height));
+            dayPanel.setBackground(c);
+            dayPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panel.add(dayPanel);
+
+            //Getting the Date
+            JLabel dayLabel = new JLabel(multiForecast.get(i).getDay());
+            dayLabel.setPreferredSize(new Dimension((width / 8), height / 10));
+            dayLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            dayPanel.add(dayLabel);
+
+            //Getting the Forecast
+            dayLabel = new JLabel((multiForecast.get(i).getWeatherDescription()).toUpperCase());
+            dayLabel.setPreferredSize(new Dimension(width / 8, height / 10));
+            dayLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            dayPanel.add(dayLabel);
+
+            //Getting the Max and Min Temp
+            dayLabel = new JLabel(multiForecast.get(i).getMaxTemp() + "°F / " + multiForecast.get(i).getMinTemp() + " °F");
+            dayLabel.setPreferredSize(new Dimension(width / 8, height / 10));
+            dayLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            dayPanel.add(dayLabel);
+
+            //Adding the Icon to the JPanel
+            String picPath = multiForecast.get(i).getWeatherPic();
+            ImageIcon weather = new ImageIcon(picPath);
+            JLabel picLabel = new JLabel(weather);
+            dayLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            //dayLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            dayPanel.add(picLabel);
+            /*
+             //Getting the Humidity
+             label = new JLabel(multiForecast.get(i).getHumidity());
+             label.setPreferredSize(new Dimension(width / 8, height / 10));
+             panel.add(label);
+             
+             //Getting the Wind Speed
+             label = new JLabel(multiForecast.get(i).getWindSpeed());
+             label.setPreferredSize(new Dimension(width / 8, height / 10));
+             panel.add(label);
+             
+             //Getting the Pressure
+             label = new JLabel(multiForecast.get(i).getPressure());
+             label.setPreferredSize(new Dimension(width / 8, height / 10));
+             panel.add(label);
+             */
+
+        }
 
         return panel;
     }
@@ -175,7 +272,7 @@ public class Controller {
         panel.setPreferredSize(new Dimension(width, height));
 
         //Light gray
-        panel.setBackground(new Color(217, 217, 217));
+        //panel.setBackground(new Color(217, 217, 217));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         return panel;
     }
@@ -190,23 +287,51 @@ public class Controller {
         panel.setBackground(new Color(46, 117, 182));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel label = new JLabel("initial");
-        panel.add(label);
-
+        //JLabel label = new JLabel("initial");
+        //panel.add(label);
         for (int i = 0; i < users.size(); i++) {
             JButton button = new JButton(users.get(i).name);
             panel.add(button);
 
             button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    label.setText(button.getText() + " pressed");
+                    //label.setText(button.getText() + " pressed");
                 }
             });
         }
         JButton button = new JButton("Pair");
         panel.add(button);
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (button.getText().equals("Pair")) {
+                    pairUser();
+                }
+                //tts.speak(button.getText());
+                //label.setText(button.getText() + " pressed");
+            }
+        });
 
         return panel;
+    }
+
+    private void pairUser() {
+        try {
+            user.removeAll();
+            user.revalidate();
+            user.repaint();
+            pause = true;
+            User usr = con.pair(user, frame);
+            System.out.println("returning from pair");
+            if (usr != null) {
+                users.add(usr);
+            }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            pause = false;
+        }
     }
 
     //Orange
@@ -214,36 +339,41 @@ public class Controller {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
         panel.setPreferredSize(new Dimension(width, height));
-        panel.setBackground(Color.ORANGE);
+        panel.setBackground(new Color(125,125,125));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         GCalendar cal = new GCalendar(user);
         ArrayList<Event> meetings = cal.meetings;
 
         JLabel label = new JLabel("Time");
-        label.setPreferredSize(new Dimension(width /4, height/10));
+        label.setPreferredSize(new Dimension(width / 4, height / 10));
         panel.add(label);
 
         label = new JLabel("Title");
-        label.setPreferredSize(new Dimension(width / 4, height/10));
+        label.setPreferredSize(new Dimension(width / 4, height / 10));
         panel.add(label);
-        
+
         label = new JLabel("Location");
-        label.setPreferredSize(new Dimension(width / 4, height/10));
+        label.setPreferredSize(new Dimension(width / 4, height / 10));
         panel.add(label);
-        
+
+        text.add(String.valueOf(meetings.size()));
         for (int i = 0; i < meetings.size(); i++) {
-            //JLabel label = new JLabel(cal.getTime(meetings.get(i))+meetings.get(i).getSummary()+" "+meetings.get(i).getLocation());
             label = new JLabel(cal.getTime(meetings.get(i)));
-            label.setPreferredSize(new Dimension(width / 4, height/10));
+            label.setPreferredSize(new Dimension(width / 4, height / 10));
             panel.add(label);
-            
+
             label = new JLabel(meetings.get(i).getSummary());
-            label.setPreferredSize(new Dimension(width / 4, height/10));
+            label.setPreferredSize(new Dimension(width / 4, height / 10));
             panel.add(label);
-            
+
             label = new JLabel(meetings.get(i).getLocation());
-            label.setPreferredSize(new Dimension(width / 4, height/10));
+            label.setPreferredSize(new Dimension(width / 4, height / 10));
             panel.add(label);
+
+            if (i == 0) {
+                text.add(meetings.get(i).getSummary());
+                text.add(cal.getTime(meetings.get(i)));
+            }
         }
 
         return panel;
@@ -253,6 +383,8 @@ public class Controller {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
         panel.setPreferredSize(new Dimension(width, height));
+        FinancialData test= new FinancialData(user);
+        test.printInfo();
 
         //slightly darker gray
         panel.setBackground(new Color(148, 148, 148));
@@ -266,93 +398,23 @@ public class Controller {
         return panel;
     }
 
-    public void run2() throws InterruptedException, IOException, JSONException {
-
-        while (true) {
-            System.out.println("Welcome to SmartHub");
-            for (int i = 0; i < menuItems.length; i++) {
-                System.out.println((i + 1) + ": " + menuItems[i]);
-            }
-            int choice = scan.nextInt();
-            switch (choice) {
-                case 1:
-                    User user = con.pair();
-                    if (user != null) {
-                        users.add(user);
-                    }
-                    break;
-                case 2:
-                    printCurrentUsers();
-                    break;
-                case 3:
-                    scan();
-                    break;
-                case 4:
-                    weather();
-                    break;
-                case 5:
-                    GCalendar cal = new GCalendar(users.get(0));
-                    cal.printCalendar();
-                    break;
-                case 6:
-                    financial();
-                    break;
-                case 7:
-                    //TextToSpeech tts=new TextToSpeech("We are going to graduate");
-                    //tts.speak();
-                    break;
-                case 8:
-                    System.out.println("goodbye");
-                    System.exit(0);
-                    break;
-            }
-        }
-
-    }
-
-    private void financial() throws IOException {
-        FinancialData data = new FinancialData(users.get(0));
-        data.printInfo();
-
-    }
-
-    private void weather() throws IOException, JSONException {
-        System.out.println("testing weather function");
-        MyWeather w = new MyWeather("New York");
-        w.doSomething();
-        //w.getWeekly();
-    }
-
     private User scan() {
 //        return users.get(0);
         for (int i = 0; i < users.size(); i++) {
             if (con.connect(users.get(i))) {
+                System.out.println("found a user");
                 return users.get(i);
             }
         }
         return null;
     }
 
-    private void delay(int time) {
+    public static void delay(int time) {
         try {
             TimeUnit.SECONDS.sleep(time);
         } catch (InterruptedException e) {
             //Handle exception
         }
-    }
-
-    private void printCurrentUsers() {
-        if (users.isEmpty()) {
-            System.out.println("No current users paired");
-        }
-        System.out.println("Current paired users");
-        for (int i = 0; i < users.size(); i++) {
-            System.out.println("Device: " + users.get(i).device);
-            System.out.println("Address: " + users.get(i).address);
-            System.out.println("Name: " + users.get(i).name);
-            System.out.println("\n");
-        }
-
     }
 
 }
