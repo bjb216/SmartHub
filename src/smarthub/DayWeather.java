@@ -21,7 +21,8 @@ public class DayWeather {
     public String imagePath;
     public String brandonPath = "/users/bartonb/Documents/GUIpics";
     public String mattPath = "/Users/Matthew/Documents/Senior Design/Weather Pics";
-    public String testPath = brandonPath;
+    public String piPath = "/home/pi/pictures";
+    public String testPath =piPath;
 
     //Creating the Day constructor
     public DayWeather(Date day, String weather, float hum, float press, int max, int min, float wind) {
