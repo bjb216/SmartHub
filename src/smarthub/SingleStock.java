@@ -17,14 +17,23 @@ public class SingleStock {
     String stockTicker;
     BigDecimal stockCost;
     BigDecimal stockPercentChange;
+    BigDecimal divYield;
+    BigDecimal ytdChange;
+    String name;
+    
     public String brandonPath = "/users/bartonb/Documents/GUIpics/";
     public String mattPath = "/Users/Matthew/Documents/Senior Design/Financial Pictures/Weather Pics";
-    public String testPath = brandonPath;
+    public String piPath = "/home/pi/pictures";
+    public String testPath = piPath;
     
-    public SingleStock(String ticker, BigDecimal cost, BigDecimal change){
+    public SingleStock(String ticker, BigDecimal cost, BigDecimal change, String name, BigDecimal divYield, BigDecimal ytdChange){
         stockTicker = ticker;
         stockCost = cost;
         stockPercentChange = change;
+        this.name=name;
+        this.divYield=divYield;
+        this.ytdChange=ytdChange;
+        
     }
     
     public String getTicker(){
@@ -41,10 +50,10 @@ public class SingleStock {
         return percentString;
     }
     
-    public String getStockPic(){
+    public String getStockPic(BigDecimal bd){
         String stockPicString = null;
         
-        if (stockPercentChange.compareTo(BigDecimal.ZERO) > 0){
+        if (bd.compareTo(BigDecimal.ZERO) > 0){
                 stockPicString = testPath+"/UpArrowGreen.png";
             }
         else{
