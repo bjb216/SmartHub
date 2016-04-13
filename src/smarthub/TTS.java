@@ -30,8 +30,8 @@ public class TTS {
     
     public void speak(String textIn)  {
 
-        String outputFileName = "/users/bartonb/speech.mp3";
-        //String outputFileName = "/home/pi/music/sound.mp3";
+        //String outputFileName = "/users/bartonb/speech.mp3";
+        String outputFileName = "/home/pi/music/sound.mp3";
         CreateSpeechRequest createSpeechRequest = new CreateSpeechRequest();
         Input input = new Input();
         Voice voice = new Voice();
