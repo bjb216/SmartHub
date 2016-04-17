@@ -33,8 +33,14 @@ public class GCalendar {
     HttpTransport httpTransport;
     JacksonFactory jsonFactory;
     private final User user;
-    private final String clientID = "1060921422022-rlk5jlp0cqj2jvvjf5kdj5i1jam83ta6.apps.googleusercontent.com";
-    private final String clientSecret = "yPUOts6QVP_ZulvbMGnmHiV4";
+    
+    //credentials for original method
+    private final String clientID="1060921422022-3dvj5las14a263cgv6coaasaieaih85v.apps.googleusercontent.com";
+    private final String clientSecret = "t8xxaUvbBR-yN6w4gWdmPeJL";
+    
+    //credentials for potential fwding
+    //private final String clientID = "1060921422022-rlk5jlp0cqj2jvvjf5kdj5i1jam83ta6.apps.googleusercontent.com";
+    //private final String clientSecret = "yPUOts6QVP_ZulvbMGnmHiV4";
 
     public GCalendar(User user) throws IOException, URISyntaxException {
         this.user = user;
@@ -60,10 +66,10 @@ public class GCalendar {
     private void createCredential(User user) throws IOException, URISyntaxException {
         //ServerSocket serverSocket = new ServerSocket(4444);
         //Socket socket = serverSocket.accept();
-        System.out.println("past server accept");
+        //System.out.println("past server accept");
 
-        //String redirectUri = "urn:ietf:wg:oauth:2.0:oob";
-        String redirectUri = "http://localhost:8080";
+        String redirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        //String redirectUri = "http://localhost:8080";
         //String redirectUri = "http://localhost:8080/oath2callback";
 
         String scope = "https://www.googleapis.com/auth/calendar";
@@ -134,7 +140,7 @@ public class GCalendar {
         }
     }
 
-    public String getTime(Event evt) {
+    public String getTime(Event evt, boolean cond) {
         Date start = new Date(evt.getStart().getDateTime().getValue());
         Date end = new Date(evt.getEnd().getDateTime().getValue());
 
@@ -143,7 +149,10 @@ public class GCalendar {
 
         System.out.println(startTime + " - " + endTime);
 
-        return startTime + " - " + endTime;
+        if(cond)
+            return startTime + " - " + endTime;
+        else
+            return startTime;
     }
 
 }
