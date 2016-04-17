@@ -13,20 +13,23 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 public class HourlyWeather {
-    public String timeOne;
+
+    public Date timeOne;
     public String weatherOne;
+    public Float tempOne;
     public String imagePath;
     public String brandonPath = "/users/bartonb/Documents/GUIpics";
     public String mattPath = "/Users/Matthew/Documents/Senior Design/Condensed Weather Pics";
-    public String testPath = mattPath;
-   
-    
+    public String piPath = "/home/pi/pictures/condensed";
+    public String testPath = piPath;
+
     //public HourlyWeather(Date tOne, String wOne, Date tTwo, String wTwo,
     //                          Date tThree, String wThree, Date tFour, String wFour) {
-    public HourlyWeather(String tOne, String wOne) {
+    public HourlyWeather(Date tOne, String wOne, Float temOne) {
         timeOne = tOne;
         weatherOne = wOne;
-        
+        tempOne = temOne;
+
         /* 
         timeTwo = tTwo;
         timeThree = tThree;
@@ -35,14 +38,16 @@ public class HourlyWeather {
         weatherTwo = wTwo;
         weatherThree = wThree;
         weatherFour = wFour;
-*/
+         */
     }
-     public void printHourForecast() {
+
+    public void printHourForecast() {
         System.out.println("Date Time: " + timeOne);
         System.out.println("Weather Description: " + weatherOne);
-        
+
     }
-     public String getTimeString(){
+
+    /*public String getTimeString(){
          String[] timeString = null;
          String tString = null;
          
@@ -61,9 +66,11 @@ public class HourlyWeather {
              tString = Integer.toString(tempInt) + ":00 PM";
          }else if(tempInt == 24){
              tString = "12:00 AM";
-         }else if(tempInt == 12){
+         } else if (tempInt == 12) {
              tString = "12:00 PM";
-         }else{
+         } else if (tempInt == 0) {
+             tString = "12:00 AM";
+         } else {
              tString = Integer.toString(tempInt) + ":00 AM";
          }
          
@@ -71,8 +78,28 @@ public class HourlyWeather {
          
          return tString;
      }
-     
-     public String getWeatherPic() {
+     */
+    public String getDay() {
+        String dateString = null;
+        //SimpleDateFormat sdfr = new SimpleDateFormat("dd/MMM/yyyy");
+        SimpleDateFormat sdfr = new SimpleDateFormat("h:mm a");
+        dateString = sdfr.format(timeOne);
+        return dateString;
+    }
+
+    public String getTemp() {
+        /*String[] timeString = null;
+        String tString = Float.toString(tempOne);
+        String tempString = Float.toString(tempOne);*/
+
+        int temp = Math.round(tempOne);
+
+        /*timeString = tString.split(".");
+        tString = timeString[1];*/
+        return Integer.toString(temp) + " °F";
+    }
+
+    public String getWeatherPic() {
 
         String description = weatherOne;
         String pngPath = null;
@@ -149,8 +176,5 @@ public class HourlyWeather {
 
         return pngPath;
     }
-    
-    
-    
-    
+
 }
