@@ -129,6 +129,7 @@ public class GCalendar {
                     .execute();
 
             meetings.addAll(events.getItems());
+            printCalendar();
             pageToken = events.getNextPageToken();
         } while (pageToken != null);
 
@@ -141,6 +142,7 @@ public class GCalendar {
     }
 
     public String getTime(Event evt, boolean cond) {
+        System.out.println("in gettime");
         Date start = new Date(evt.getStart().getDateTime().getValue());
         Date end = new Date(evt.getEnd().getDateTime().getValue());
 
