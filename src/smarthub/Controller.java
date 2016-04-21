@@ -75,7 +75,7 @@ public class Controller {
         Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.getContentPane().setPreferredSize(screensize);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        gd.setFullScreenWindow(frame);
+        //gd.setFullScreenWindow(frame);
 
         width = screensize.width;
         height = screensize.height;
@@ -110,8 +110,8 @@ public class Controller {
 
         users.add(new User("Brandon"));
 
-        users.add(new User("Matt"));
-        users.add(new User("Jenna"));
+        //users.add(new User("Matt"));
+        //users.add(new User("Jenna"));
 
     }
 
@@ -124,11 +124,22 @@ public class Controller {
         int i = 0;
         JPanel userPanel = null;
         while (true) {
+            finText.clear();
+            calText.clear();
+            weatherText.clear();
             //System.out.println("number of users: " + users.size());
             i = (i + 1) % 6;
             //User current = scan();
             scanTest(i);
             //scan();
+            if(currentUser==null)
+                System.out.println("User: null");
+            else
+                System.out.println("current user: "+currentUser.name);
+            
+            System.out.println("change: "+change);
+            System.out.println("pause: "+pause);
+            
             if (currentUser == null && pause == false && change) {
                 //System.out.println("removing");
                 user.remove(userPanel);
@@ -142,12 +153,12 @@ public class Controller {
                 user.revalidate();
                 user.repaint();
                 change = true;
-                //createTTS(currentUser);
+                createTTS(currentUser);
 
             } else {
                 //System.out.println("still in range");
             }
-            delay(5);
+            delay(8);
             updateTime();
         }
     }
@@ -155,21 +166,13 @@ public class Controller {
     private void createTTS(User user) {
         int i = 0;
         String message = "Hello " + user.name + ". ";
-        /*System.out.println(text.get(i));
-        if (!text.get(i).equals("0")) {
-            System.out.println("in if");
-            i++;
-            message = message.concat("Your first event is " + text.get(i) + " at");
-            i++;
-            message = message.concat(text.get(i));
-        }*/
         
         if (user.calTalk == false){
             message = message.concat("calTalk: FALSE ");
         }else{
             message = message.concat("You have " + calText.get(i) + " events on your calendar for the rest of today. ");
             if (!calText.get(i).equals("0")) {
-                System.out.println("in if");
+                //System.out.println("in if");
                 i++;
                 message = message.concat("Your first event is " + calText.get(i) + " at ");
                 i++;
@@ -200,7 +203,7 @@ public class Controller {
         System.out.println("**************************************************");
         System.out.println(message);
         System.out.println("**************************************************");
-        //tts.speak(message);
+        tts.speak(message);
 
     }
 
@@ -223,12 +226,12 @@ public class Controller {
         JPanel weatherPanel;
         JPanel stockPanel;
 
-        /*
+        
         if(user.calSmall==true)
             calendarPanel=calendarPanel(user, (int) (width/2.05), height / 2);
         else
             calendarPanel=calendarPanel(user, (int) (width/1.1), height / 2);
-         */
+         
         if (user.weatherSmall == true) {
             weatherPanel = weatherPanel(user, (int) (width / 2.05), height / 2);
         } else {
@@ -267,7 +270,7 @@ public class Controller {
         title.setForeground(Color.WHITE);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        DateFormat dateFormat = new SimpleDateFormat("EEEE MM/dd/yyyy hh:mm:ss a");
+        DateFormat dateFormat = new SimpleDateFormat("EEEE MM/dd/yyyy hh:mm a");
         Date d = new Date();
         time = new JLabel(dateFormat.format(d));
         //date.setPreferredSize(new Dimension((int) (width / 2.5), height));
@@ -283,7 +286,7 @@ public class Controller {
     }
 
     private void updateTime(){
-        DateFormat dateFormat = new SimpleDateFormat("EEEE MM/dd/yyyy hh:mm:ss a");
+        DateFormat dateFormat = new SimpleDateFormat("EEEE MM/dd/yyyy hh:mm a");
         Date d = new Date();
         time.setText(dateFormat.format(d));
     }
@@ -307,6 +310,8 @@ public class Controller {
         int numDays;
         int numHours;
         double divisor;
+        double ratio = 0.45;
+        
         if(user.weatherSmall==true){
             numHours = 4;//Getting the number of hours for the forecast panel
             numDays = 1;
@@ -319,8 +324,9 @@ public class Controller {
             //Creating the Left side day Panel
             for (int i = 0; i < numDays; i++) {
                 JPanel dayPanel = new JPanel();
+                //dayPanel.add(addSpace((int) (width * ratio * 0.9),75));
                 dayPanel.setLayout(new BoxLayout(dayPanel, BoxLayout.PAGE_AXIS));
-                dayPanel.setPreferredSize(new Dimension((int) (width / divisor), height));
+                dayPanel.setPreferredSize(new Dimension((int) (width * ratio * 0.9), height));
                 dayPanel.setBackground(c);
                 dayPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 panel.add(dayPanel);
@@ -363,21 +369,22 @@ public class Controller {
             }
             //Creating the Hourly Panel
             JPanel hourPanel = new JPanel();
+            //hourPanel.add(addSpace((int)(1-ratio) * width,75));
             //hourPanel.setLayout(new BoxLayout(hourPanel, BoxLayout.PAGE_AXIS));
             hourPanel.setLayout(new FlowLayout());
-            hourPanel.setPreferredSize(new Dimension((int) (width / divisor), height));
+            hourPanel.setPreferredSize(new Dimension((int) (width * (1-ratio)), height));
             hourPanel.setBackground(c);
             hourPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             panel.add(hourPanel);
             
              for (int j=0; j < numHours; j++){
                 JLabel hourLabel = new JLabel(hourForecast.get(j).getDay());
-                hourLabel.setPreferredSize(new Dimension((int) ((width / divisor)/1.5), height / 10));
+                hourLabel.setPreferredSize(new Dimension(75, height / 10));
                 hourLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 hourPanel.add(hourLabel);
                 
                 hourLabel = new JLabel((hourForecast.get(j).getTemp()));
-                hourLabel.setPreferredSize(new Dimension((int) (width / divisor), height / 10));
+                hourLabel.setPreferredSize(new Dimension(50, height / 10));
                 hourLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 hourPanel.add(hourLabel);
                 
@@ -401,6 +408,7 @@ public class Controller {
 
             for (int i = 0; i < numDays; i++) {
                 JPanel dayPanel = new JPanel();
+                dayPanel.add(addSpace((int) (width / divisor),30));
                 dayPanel.setLayout(new BoxLayout(dayPanel, BoxLayout.PAGE_AXIS));
                 dayPanel.setPreferredSize(new Dimension((int) (width / divisor), height));
                 dayPanel.setBackground(c);
@@ -657,24 +665,17 @@ public class Controller {
     }
 
     private void pairUser() {
-        try {
-            user.removeAll();
-            user.revalidate();
-            user.repaint();
-            pause = true;
-            User usr = con.pair(user, frame);
-            System.out.println("returning from pair");
-            if (usr != null) {
-                users.add(usr);
-                addButton(usr);
-            }
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            pause = false;
+        //user.removeAll();
+        //user.revalidate();
+        //user.repaint();
+        pause = true;
+        User usr = con.pair(user, frame);
+        System.out.println("returning from pair");
+        if (usr != null) {
+            users.add(usr);
+            addButton(usr);
         }
+        pause = false;
     }
     
     private void addButton(User user){
@@ -720,7 +721,7 @@ public class Controller {
         panel.add(label);
         }
 
-        //text.add(String.valueOf(meetings.size()));
+        calText.add(String.valueOf(meetings.size()));
         for (int i = 0; i < meetings.size(); i++) {
             String time;
             if(user.calSmall)
@@ -744,8 +745,8 @@ public class Controller {
             
             
             if (i == 0) {
-                //text.add(meetings.get(i).getSummary());
-                //text.add(cal.getTime(meetings.get(i)));
+                calText.add(meetings.get(i).getSummary());
+                calText.add(cal.getTime(meetings.get(i),true));
             }
         }
 
@@ -788,11 +789,13 @@ public class Controller {
                 label.setPreferredSize(new Dimension(150,h));
                 panel.add(label);
             }
-
+            
+            finText.add(stockList.get(i).getTicker());
             JLabel label = new JLabel(stockList.get(i).getTicker());
             label.setPreferredSize(new Dimension(75,h));
             panel.add(label);
 
+            finText.add("now costs " + "$" + stockList.get(i).getCost());
             label = new JLabel("$" + stockList.get(i).getCost());
             label.setPreferredSize(new Dimension(75,h));
             panel.add(label);
@@ -804,6 +807,7 @@ public class Controller {
             label.setAlignmentX(Component.CENTER_ALIGNMENT);
             panel.add(picLabel);
 
+            finText.add(" and had a daily change of " + stockList.get(i).getPercentChange() + "%");
             label = new JLabel(stockList.get(i).getPercentChange() + "%");
             label.setPreferredSize(new Dimension(75,h));
             panel.add(label);
@@ -834,9 +838,10 @@ public class Controller {
 
     private void scan() {
 //        return users.get(0);
+        System.out.println("Scanning");
         for (int i = 0; i < users.size(); i++) {
             if (con.connect(users.get(i))) {
-                //System.out.println("found a user");
+                System.out.println("found user: "+users.get(i).name);
                 currentUser = users.get(i);
                 return;
             }
