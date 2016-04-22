@@ -75,7 +75,7 @@ public class Controller {
         Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.getContentPane().setPreferredSize(screensize);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        //gd.setFullScreenWindow(frame);
+        gd.setFullScreenWindow(frame);
 
         width = screensize.width;
         height = screensize.height;
@@ -83,7 +83,7 @@ public class Controller {
         //frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         //frame.setUndecorated(true);
-        //frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.getContentPane().setLayout((new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS)));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(topPanel(width, height / 8));
@@ -94,7 +94,9 @@ public class Controller {
 
         user = bodyPanel(width * 7 / 8, height * 7 / 8);
         body.add(user);
-        body.add(sidePanel(width / 8, height * 7 / 8));
+        sidePanel = sidePanel(width / 8, height * 7 / 8);
+        addUserButtons();
+        body.add(sidePanel);
 
         //frame.setBackground(Color.blue);
         //frame.pack();
@@ -108,11 +110,11 @@ public class Controller {
         //        users.add(user);
         //  }
 
-        users.add(new User("Brandon"));
+        users.add(new User("Brandon",frame));
 
-        //users.add(new User("Matt"));
-        //users.add(new User("Jenna"));
-
+        users.add(new User("Matt",frame));
+        users.add(new User("Jenna",frame));
+        users.add(new User("Jane",frame));
     }
 
     public void run() throws IOException, JSONException, URISyntaxException {
@@ -132,14 +134,15 @@ public class Controller {
             //User current = scan();
             scanTest(i);
             //scan();
-            if(currentUser==null)
+            if (currentUser == null) {
                 System.out.println("User: null");
-            else
-                System.out.println("current user: "+currentUser.name);
-            
-            System.out.println("change: "+change);
-            System.out.println("pause: "+pause);
-            
+            } else {
+                System.out.println("current user: " + currentUser.name);
+            }
+
+            System.out.println("change: " + change);
+            System.out.println("pause: " + pause);
+
             if (currentUser == null && pause == false && change) {
                 //System.out.println("removing");
                 user.remove(userPanel);
@@ -153,7 +156,7 @@ public class Controller {
                 user.revalidate();
                 user.repaint();
                 change = true;
-                createTTS(currentUser);
+                //createTTS(currentUser);
 
             } else {
                 //System.out.println("still in range");
@@ -166,10 +169,10 @@ public class Controller {
     private void createTTS(User user) {
         int i = 0;
         String message = "Hello " + user.name + ". ";
-        
-        if (user.calTalk == false){
+
+        if (user.calTalk == false) {
             message = message.concat("calTalk: FALSE ");
-        }else{
+        } else {
             message = message.concat("You have " + calText.get(i) + " events on your calendar for the rest of today. ");
             if (!calText.get(i).equals("0")) {
                 //System.out.println("in if");
@@ -179,25 +182,25 @@ public class Controller {
                 message = message.concat(calText.get(i) + ". ");
             }
         }
-        
-        if (user.weatherTalk == false){
+
+        if (user.weatherTalk == false) {
             message = message.concat("weatherTalk: FALSE ");
-        }else{
-            message = message.concat("The weather forecast for " + weatherText.get(0) + " is " +
-                    weatherText.get(1) + " with a high temperature of " + weatherText.get(2) + " and a low of "+
-                    weatherText.get(3) + ". ");
+        } else {
+            message = message.concat("The weather forecast for " + weatherText.get(0) + " is "
+                    + weatherText.get(1) + " with a high temperature of " + weatherText.get(2) + " and a low of "
+                    + weatherText.get(3) + ". ");
         }
-        
-        if (user.finTalk == false){
+
+        if (user.finTalk == false) {
             message = message.concat("calTalk: FALSE ");
-        }else{
+        } else {
             message = message.concat("The important updates from the financial market are: ");
             int size = finText.size();
             int fin = 0;
-            for (fin = 0; fin< size; fin++){
+            for (fin = 0; fin < size; fin++) {
                 message = message.concat(" " + finText.get(fin));
             }
-            
+
         }
         message = message.concat(" I hope the rest of your day goes well!");
         System.out.println("**************************************************");
@@ -226,25 +229,24 @@ public class Controller {
         JPanel weatherPanel;
         JPanel stockPanel;
 
-        
+        /*
         if(user.calSmall==true)
             calendarPanel=calendarPanel(user, (int) (width/2.05), height / 2);
         else
             calendarPanel=calendarPanel(user, (int) (width/1.1), height / 2);
-         
+         */
         if (user.weatherSmall == true) {
             weatherPanel = weatherPanel(user, (int) (width / 2.05), height / 2);
         } else {
-            weatherPanel = weatherPanel(user, (int) (width/1.05), height / 2);
+            weatherPanel = weatherPanel(user, (int) (width / 1.05), height / 2);
         }
 
         if (user.finSmall == true) {
             stockPanel = stockPanel(user, (int) (width / 2.05), height / 2);
         } else {
-            stockPanel = stockPanel(user, (int) (width/1.05), height / 2);
+            stockPanel = stockPanel(user, (int) (width / 1.05), height / 2);
         }
 
-        
         panel.add(stockPanel);
         //panel.add(stockPanel);
         panel.add(weatherPanel);
@@ -285,12 +287,12 @@ public class Controller {
         return panel;
     }
 
-    private void updateTime(){
+    private void updateTime() {
         DateFormat dateFormat = new SimpleDateFormat("EEEE MM/dd/yyyy hh:mm a");
         Date d = new Date();
         time.setText(dateFormat.format(d));
     }
-    
+
     private JPanel weatherPanel(User user, int width, int height) throws IOException, JSONException {
         Color c = new Color(130, 130, 130);
         JPanel panel = new JPanel();
@@ -298,29 +300,29 @@ public class Controller {
         panel.setPreferredSize(new Dimension(width, height));
         panel.setBackground(c);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         //Initializations
         //Inserting Weather from the Weather class
         ArrayList<DayWeather> multiForecast = new ArrayList<DayWeather>();
         ArrayList<HourlyWeather> hourForecast = new ArrayList<HourlyWeather>();
-        
+
         MyWeather w = new MyWeather("New York");
         //MyWeather w = new MyWeather("Bethlehem");
-        
+
         int numDays;
         int numHours;
         double divisor;
         double ratio = 0.45;
-        
-        if(user.weatherSmall==true){
+
+        if (user.weatherSmall == true) {
             numHours = 4;//Getting the number of hours for the forecast panel
             numDays = 1;
             divisor = (numDays + 1) * 1.4;
-            
+
             w.multiDayForecast(multiForecast, numDays);
             w.hourlyForecast(hourForecast, numHours);
             w.printHourlyForecast(hourForecast);
-            
+
             //Creating the Left side day Panel
             for (int i = 0; i < numDays; i++) {
                 JPanel dayPanel = new JPanel();
@@ -372,31 +374,31 @@ public class Controller {
             //hourPanel.add(addSpace((int)(1-ratio) * width,75));
             //hourPanel.setLayout(new BoxLayout(hourPanel, BoxLayout.PAGE_AXIS));
             hourPanel.setLayout(new FlowLayout());
-            hourPanel.setPreferredSize(new Dimension((int) (width * (1-ratio)), height));
+            hourPanel.setPreferredSize(new Dimension((int) (width * (1 - ratio)), height));
             hourPanel.setBackground(c);
             hourPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             panel.add(hourPanel);
-            
-             for (int j=0; j < numHours; j++){
+
+            for (int j = 0; j < numHours; j++) {
                 JLabel hourLabel = new JLabel(hourForecast.get(j).getDay());
                 hourLabel.setPreferredSize(new Dimension(75, height / 10));
                 hourLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 hourPanel.add(hourLabel);
-                
+
                 hourLabel = new JLabel((hourForecast.get(j).getTemp()));
                 hourLabel.setPreferredSize(new Dimension(50, height / 10));
                 hourLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 hourPanel.add(hourLabel);
-                
+
                 //Adding the Icon to the JPanel
                 String picPath = hourForecast.get(j).getWeatherPic();
                 ImageIcon weather = new ImageIcon(picPath);
                 JLabel picLabel = new JLabel(weather);
                 picLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 hourPanel.add(picLabel);
-             }
+            }
 
-        }else{
+        } else {
             numDays = 7;//Getting the full week's Forecast
             divisor = numDays * 1.05;
 
@@ -404,11 +406,9 @@ public class Controller {
             w.multiDayForecast(multiForecast, numDays);
             w.printMultiDayForecast(multiForecast);
 
-            
-
             for (int i = 0; i < numDays; i++) {
                 JPanel dayPanel = new JPanel();
-                dayPanel.add(addSpace((int) (width / divisor),30));
+                dayPanel.add(addSpace((int) (width / divisor), 30));
                 dayPanel.setLayout(new BoxLayout(dayPanel, BoxLayout.PAGE_AXIS));
                 dayPanel.setPreferredSize(new Dimension((int) (width / divisor), height));
                 dayPanel.setBackground(c);
@@ -450,13 +450,11 @@ public class Controller {
                 JLabel picLabel = new JLabel(weather);
                 picLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 dayPanel.add(picLabel);
-                
-               
+
             }
 
         }
-        
-        
+
         return panel;
     }
 
@@ -473,40 +471,46 @@ public class Controller {
     }
 
     private JPanel sidePanel(int width, int height) {
-        sidePanel = new JPanel();
+        JPanel panel = new JPanel();
         //panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        sidePanel.setLayout(new FlowLayout());
-        sidePanel.setPreferredSize(new Dimension(width, height));
+        panel.setLayout(new FlowLayout());
+        panel.setPreferredSize(new Dimension(width, height));
 
         //Slightly lighter blue than top
-        sidePanel.setBackground(new Color(46, 117, 182));
-        sidePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        //JLabel label = new JLabel("initial");
-        //panel.add(label);
-        for (int i = 0; i < users.size(); i++) {
-            JButton button = new JButton(users.get(i).name);
-            sidePanel.add(button);
-
-            button.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    loadPreferences(getUserFromString(button.getText()));
-                }
-            });
-        }
+        panel.setBackground(new Color(46, 117, 182));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return panel;
+    }
+    
+    private void addUserButtons(){
+        sidePanel.removeAll();
         JButton button = new JButton("Pair");
+        button.setPreferredSize(new Dimension(120,40));
         sidePanel.add(button);
+        sidePanel.add(addSpace(120,5));
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (button.getText().equals("Pair")) {
                     pairUser();
                 }
-                //tts.speak(button.getText());
-                //label.setText(button.getText() + " pressed");
             }
         });
+        
+        for (int i = 0; i < users.size(); i++) {
+            JButton btn = new JButton(users.get(i).name);
+            btn.setPreferredSize(new Dimension(120,40));
+            sidePanel.add(btn);
+            sidePanel.add(addSpace(120,5));
 
-        return sidePanel;
+            btn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    loadPreferences(getUserFromString(btn.getText()));
+                }
+            });
+        }
+        sidePanel.revalidate();
+        sidePanel.repaint();
+        
     }
 
     private User getUserFromString(String str) {
@@ -534,10 +538,13 @@ public class Controller {
         panel.setBackground(new Color(100, 100, 100));
 
         JLabel title = new JLabel(usr.name + "'s Preferences");
-        title.setPreferredSize(new Dimension(400, 20));
+        title.setPreferredSize(new Dimension(250, 20));
         panel.add(title);
-        
+
         //panel.add(addSpace(user.getWidth(), (int) (user.getHeight() / 2.2)));
+        JButton priority = new JButton("Increase Priority");
+        panel.add(priority);
+
         JButton inRoom = new JButton("I am in the Room");
         panel.add(inRoom);
 
@@ -554,18 +561,18 @@ public class Controller {
         JButton finState = new JButton(usr.getState("financial"));
         JButton calState = new JButton(usr.getState("calendar"));
         JButton weatherState = new JButton(usr.getState("weather"));
-        
-        finState.setPreferredSize(new Dimension(115,40));
-        calState.setPreferredSize(new Dimension(115,40));
-        weatherState.setPreferredSize(new Dimension(115,40));
+
+        finState.setPreferredSize(new Dimension(115, 40));
+        calState.setPreferredSize(new Dimension(115, 40));
+        weatherState.setPreferredSize(new Dimension(115, 40));
 
         JButton finTalk = new JButton(usr.getTalk("financial"));
         JButton calTalk = new JButton(usr.getTalk("calendar"));
         JButton weatherTalk = new JButton(usr.getTalk("weather"));
-        
-        finTalk.setPreferredSize(new Dimension(115,40));
-        calTalk.setPreferredSize(new Dimension(115,40));
-        weatherTalk.setPreferredSize(new Dimension(115,40));
+
+        finTalk.setPreferredSize(new Dimension(115, 40));
+        calTalk.setPreferredSize(new Dimension(115, 40));
+        weatherTalk.setPreferredSize(new Dimension(115, 40));
 
         panel.add(finLabel);
         panel.add(finState);
@@ -653,11 +660,33 @@ public class Controller {
             }
         });
 
+        priority.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (changePriority(usr)) {
+                    JOptionPane.showMessageDialog(frame, "Priority level changed");
+                    addUserButtons();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Priority already highest level");
+                }
+            }
+        });
+
         user.add(panel);
         user.revalidate();
         user.repaint();
     }
-    
+
+    private boolean changePriority(User usr) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).equals(usr) && i != 0) {
+                users.remove(i);
+                users.add(i - 1, usr);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private JLabel addSpace(int width, int height) {
         JLabel space = new JLabel("");
         space.setPreferredSize(new Dimension(width, height));
@@ -665,9 +694,6 @@ public class Controller {
     }
 
     private void pairUser() {
-        //user.removeAll();
-        //user.revalidate();
-        //user.repaint();
         pause = true;
         User usr = con.pair(user, frame);
         System.out.println("returning from pair");
@@ -677,16 +703,11 @@ public class Controller {
         }
         pause = false;
     }
-    
-    private void addButton(User user){
-        JButton button = new JButton(user.name);
-            sidePanel.add(button);
 
-            button.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    loadPreferences(getUserFromString(button.getText()));
-                }
-            });
+    private void addButton(User user) {
+        JButton button = new JButton(user.name);
+        sidePanel.add(button);
+        addUserButtons();
     }
 
     //Orange
@@ -700,13 +721,12 @@ public class Controller {
         ArrayList<Event> meetings = cal.meetings;
 
         int w;
-        if(user.calSmall==false){
-            w=width/4;
+        if (user.calSmall == false) {
+            w = width / 4;
+        } else {
+            w = width / 2;
         }
-        else{
-            w=width/2;
-        }
-        
+
         JLabel label = new JLabel("Time");
         label.setPreferredSize(new Dimension(width / 4, height / 10));
         panel.add(label);
@@ -715,20 +735,21 @@ public class Controller {
         label.setPreferredSize(new Dimension(w, height / 10));
         panel.add(label);
 
-        if(user.calSmall==false){
-        label = new JLabel("Location");
-        label.setPreferredSize(new Dimension(width / 4, height / 10));
-        panel.add(label);
+        if (user.calSmall == false) {
+            label = new JLabel("Location");
+            label.setPreferredSize(new Dimension(width / 4, height / 10));
+            panel.add(label);
         }
 
         calText.add(String.valueOf(meetings.size()));
         for (int i = 0; i < meetings.size(); i++) {
             String time;
-            if(user.calSmall)
-                time=cal.getTime(meetings.get(i),false);
-            else
-                time=cal.getTime(meetings.get(i),true);
-            
+            if (user.calSmall) {
+                time = cal.getTime(meetings.get(i), false);
+            } else {
+                time = cal.getTime(meetings.get(i), true);
+            }
+
             label = new JLabel(time);
             label.setPreferredSize(new Dimension(width / 4, height / 10));
             panel.add(label);
@@ -737,16 +758,15 @@ public class Controller {
             label.setPreferredSize(new Dimension(w, height / 10));
             panel.add(label);
 
-            if(user.calSmall==false){
-            label = new JLabel(meetings.get(i).getLocation());
-            label.setPreferredSize(new Dimension(width / 4, height / 10));
-            panel.add(label);
+            if (user.calSmall == false) {
+                label = new JLabel(meetings.get(i).getLocation());
+                label.setPreferredSize(new Dimension(width / 4, height / 10));
+                panel.add(label);
             }
-            
-            
+
             if (i == 0) {
                 calText.add(meetings.get(i).getSummary());
-                calText.add(cal.getTime(meetings.get(i),true));
+                calText.add(cal.getTime(meetings.get(i), true));
             }
         }
 
@@ -761,43 +781,42 @@ public class Controller {
         //Making the stock arrayList
         ArrayList<SingleStock> stockList = new ArrayList<SingleStock>();
         FinancialData test = new FinancialData(user);
-        test.populateStockArray(user.stocks, stockList);
+        test.populateStockArray(stockList);
         test.printInfo();
 
         //slightly darker gray
         panel.setBackground(new Color(148, 148, 148));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        int h=25;
-        if(user.finSmall==false){
-        panel.add(addSpace(300,10));
-        JLabel label = new JLabel("% chg");
-        label.setPreferredSize(new Dimension(85,h));
-        panel.add(label);
-        label = new JLabel("YTD chg");
-        label.setPreferredSize(new Dimension(90,h));
-        panel.add(label);
-        label = new JLabel("Div yield");
-        label.setPreferredSize(new Dimension(75,h));
-        panel.add(label);
+
+        int h = 25;
+        if (user.finSmall == false) {
+            panel.add(addSpace(300, 10));
+            JLabel label = new JLabel("% chg");
+            label.setPreferredSize(new Dimension(85, h));
+            panel.add(label);
+            label = new JLabel("YTD chg");
+            label.setPreferredSize(new Dimension(90, h));
+            panel.add(label);
+            label = new JLabel("Div yield");
+            label.setPreferredSize(new Dimension(75, h));
+            panel.add(label);
         }
-        
-        
+
         for (int i = 0; i < stockList.size(); i++) {
             if (user.finSmall == false) {
                 JLabel label = new JLabel(stockList.get(i).name);
-                label.setPreferredSize(new Dimension(150,h));
+                label.setPreferredSize(new Dimension(150, h));
                 panel.add(label);
             }
-            
+
             finText.add(stockList.get(i).getTicker());
             JLabel label = new JLabel(stockList.get(i).getTicker());
-            label.setPreferredSize(new Dimension(75,h));
+            label.setPreferredSize(new Dimension(75, h));
             panel.add(label);
 
             finText.add("now costs " + "$" + stockList.get(i).getCost());
             label = new JLabel("$" + stockList.get(i).getCost());
-            label.setPreferredSize(new Dimension(75,h));
+            label.setPreferredSize(new Dimension(75, h));
             panel.add(label);
 
             //Adding the Icon to the JPanel
@@ -809,7 +828,7 @@ public class Controller {
 
             finText.add(" and had a daily change of " + stockList.get(i).getPercentChange() + "%");
             label = new JLabel(stockList.get(i).getPercentChange() + "%");
-            label.setPreferredSize(new Dimension(75,h));
+            label.setPreferredSize(new Dimension(75, h));
             panel.add(label);
 
             if (user.finSmall == false) {
@@ -820,11 +839,11 @@ public class Controller {
                 panel.add(picLabel);
 
                 label = new JLabel(stockList.get(i).ytdChange + "%");
-                label.setPreferredSize(new Dimension(75,h));
+                label.setPreferredSize(new Dimension(75, h));
                 panel.add(label);
-                
+
                 label = new JLabel(stockList.get(i).divYield + "%");
-                label.setPreferredSize(new Dimension(75,h));
+                label.setPreferredSize(new Dimension(75, h));
                 panel.add(label);
             }
 
@@ -841,7 +860,7 @@ public class Controller {
         System.out.println("Scanning");
         for (int i = 0; i < users.size(); i++) {
             if (con.connect(users.get(i))) {
-                System.out.println("found user: "+users.get(i).name);
+                System.out.println("found user: " + users.get(i).name);
                 currentUser = users.get(i);
                 return;
             }
