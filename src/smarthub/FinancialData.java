@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.math.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import yahoofinance.quotes.stock.StockDividend;
 
 
@@ -17,7 +19,7 @@ import yahoofinance.quotes.stock.StockDividend;
 //http://financequotes-api.com
 
 public class FinancialData {
-    private final String[] stocks;
+    private final ArrayList<String> stocks;
     User user;
     
     public FinancialData(User user){
@@ -25,7 +27,7 @@ public class FinancialData {
         this.stocks=user.stocks;
     }
     
-    public void populateStockArray(String[] stockList, ArrayList stockArray) throws IOException{
+    public void populateStockArray(ArrayList stockArray) throws IOException{
         String ticker;
         String name;
         BigDecimal cost;
@@ -34,9 +36,9 @@ public class FinancialData {
         BigDecimal ytdChange;
         YahooFinance.logger.setUseParentHandlers(false);
         
-        for (int i = 0; i <stocks.length; i++){
-            Stock stk = YahooFinance.get(stocks[i]);
-            ticker = stocks[i];
+        for (int i = 0; i <stocks.size(); i++){
+            Stock stk = YahooFinance.get(stocks.get(i));
+            ticker = stocks.get(i);
             cost = stk.getQuote().getPrice();
             percent = stk.getQuote().getChangeInPercent();
             name = stk.getName();
@@ -57,10 +59,19 @@ public class FinancialData {
     }
     
     public void printInfo() throws IOException{
-        for (int i=0;i<stocks.length;i++){
-            Stock stk=YahooFinance.get(stocks[i]);
+        for (int i=0;i<stocks.size();i++){
+            Stock stk=YahooFinance.get(stocks.get(i));
             //System.out.println(stocks[i]+" "+stk.getQuote().getPrice()+" "+stk.getQuote().getChangeInPercent());
         }
+    }
+    
+    public static boolean isValid(String ticker){
+        try {
+            Stock stock = YahooFinance.get(ticker);
+        } catch (IOException ex) {
+            return false;
+        }
+        return true;
     }
     
    /* public String getPrice(){
